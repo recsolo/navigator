@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 
 from fastapi import FastAPI, HTTPException
@@ -7,14 +8,17 @@ from fastapi.responses import JSONResponse
 from .config import get_settings
 from .db import (
     export_full_backup,
+    get_app_settings,
+    get_app_settings_view,
     get_preferences,
     get_saved_session,
     init_db,
     list_saved_sessions,
+    save_app_settings,
     save_preferences,
     save_session,
 )
-from .schemas import RecommendationRequest, UserPreferences
+from .schemas import AppSettingsUpdate, RecommendationRequest, UserPreferences
 from .services.recommendations import (
     get_questionnaire,
     get_runtime_status,
@@ -23,7 +27,15 @@ from .services.recommendations import (
 )
 
 settings = get_settings()
-app = FastAPI(title=settings.app_name, version=settings.version)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    init_db()
+    yield
+
+
+app = FastAPI(title=settings.app_name, version=settings.version, lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -32,12 +44,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.on_event("startup")
-def on_startup() -> None:
-    init_db()
-
 
 @app.get("/api/health")
 def health() -> dict[str, str]:
@@ -83,6 +89,16 @@ def session_detail(session_id: str):
 @app.get("/api/preferences")
 def preferences():
     return get_preferences()
+
+
+@app.get("/api/app-settings")
+def app_settings():
+    return get_app_settings_view(settings.local_profile_id)
+
+
+@app.put("/api/app-settings")
+def update_app_settings(payload: AppSettingsUpdate):
+    return save_app_settings(payload)
 
 
 @app.put("/api/preferences")

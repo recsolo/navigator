@@ -178,6 +178,8 @@ function apiUrl(pathname) {
 }
 
 const form = document.getElementById('questionnaireForm');
+const tabButtons = Array.from(document.querySelectorAll('[data-tab-target]'));
+const tabPanels = Array.from(document.querySelectorAll('[data-tab-panel]'));
 const statusNode = document.getElementById('apiStatus');
 const summaryHeading = document.getElementById('summaryHeading');
 const summaryText = document.getElementById('summaryText');
@@ -186,6 +188,12 @@ const workflowList = document.getElementById('workflowList');
 const sessionList = document.getElementById('sessionList');
 const savePreferencesButton = document.getElementById('savePreferencesButton');
 const previewSubmitButton = document.getElementById('previewSubmitButton');
+const appSettingsForm = document.getElementById('appSettingsForm');
+const saveAppSettingsButton = document.getElementById('saveAppSettingsButton');
+const appSettingsStatusNode = document.getElementById('appSettingsStatus');
+const toggleApiKeyVisibilityButton = document.getElementById('toggleApiKeyVisibility');
+const clearApiKeyButton = document.getElementById('clearApiKeyButton');
+const apiKeyPreviewNode = document.getElementById('apiKeyPreview');
 const runtimeBackendNode = document.getElementById('runtimeBackend');
 const runtimeEngineNode = document.getElementById('runtimeEngine');
 const runtimeProfileNode = document.getElementById('runtimeProfile');
@@ -198,6 +206,17 @@ const copySessionIdButton = document.getElementById('copySessionId');
 const exportBackupButton = document.getElementById('exportBackupButton');
 
 let questionnaireShowWhen = {};
+
+function switchTab(target) {
+  tabButtons.forEach((button) => {
+    const active = button.getAttribute('data-tab-target') === target;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  tabPanels.forEach((panel) => {
+    panel.hidden = panel.getAttribute('data-tab-panel') !== target;
+  });
+}
 
 function fieldIdToDomId(fieldId) {
   return fieldId.replace(/_([a-z])/g, (_, ch) => ch.toUpperCase());
@@ -486,6 +505,12 @@ function setStatusMessage(message) {
   }
 }
 
+function setAppSettingsMessage(message) {
+  if (appSettingsStatusNode) {
+    appSettingsStatusNode.textContent = message;
+  }
+}
+
 function renderRuntimeStatus(payload) {
   runtimeBackendNode.textContent = payload.backend_status || 'offline';
   runtimeEngineNode.textContent =
@@ -611,6 +636,103 @@ async function loadRuntimeStatus() {
   }
 }
 
+function fillAppSettingsForm(payload) {
+  if (!appSettingsForm) {
+    return;
+  }
+  document.getElementById('openAiApiKey').value = '';
+  document.getElementById('recommendationModel').value =
+    payload.recommendation_model || 'gpt-5.4';
+  document.getElementById('reasoningEffort').value =
+    payload.recommendation_reasoning_effort || 'low';
+  document.getElementById('responseVerbosity').value =
+    payload.recommendation_verbosity || 'low';
+  if (apiKeyPreviewNode) {
+    apiKeyPreviewNode.textContent = payload.api_key_configured
+      ? `Stored key: ${payload.api_key_preview || 'configured'}`
+      : 'No stored key.';
+  }
+}
+
+async function loadAppSettings() {
+  if (!appSettingsForm) {
+    return;
+  }
+  try {
+    const response = await fetch(apiUrl('/api/app-settings'));
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    fillAppSettingsForm(payload);
+    setAppSettingsMessage('Loaded local engine settings.');
+  } catch (error) {
+    setAppSettingsMessage('Could not load local engine settings.');
+  }
+}
+
+async function saveAppSettings() {
+  if (!appSettingsForm) {
+    return;
+  }
+  const formData = new FormData(appSettingsForm);
+  const payload = {
+    profile_id: 'default',
+    openai_api_key: formData.get('openai_api_key') || null,
+    clear_openai_api_key: false,
+    recommendation_model: formData.get('recommendation_model') || 'gpt-5.4',
+    recommendation_reasoning_effort:
+      formData.get('recommendation_reasoning_effort') || 'low',
+    recommendation_verbosity:
+      formData.get('recommendation_verbosity') || 'low'
+  };
+
+  try {
+    const response = await fetch(apiUrl('/api/app-settings'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const saved = await response.json();
+    fillAppSettingsForm(saved);
+    setAppSettingsMessage('Saved local engine settings.');
+    await loadRuntimeStatus();
+  } catch (error) {
+    setAppSettingsMessage('Could not save local engine settings.');
+  }
+}
+
+async function clearStoredApiKey() {
+  try {
+    const response = await fetch(apiUrl('/api/app-settings'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        profile_id: 'default',
+        clear_openai_api_key: true,
+        recommendation_model:
+          document.getElementById('recommendationModel').value || 'gpt-5.4',
+        recommendation_reasoning_effort:
+          document.getElementById('reasoningEffort').value || 'low',
+        recommendation_verbosity:
+          document.getElementById('responseVerbosity').value || 'low'
+      })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const saved = await response.json();
+    fillAppSettingsForm(saved);
+    setAppSettingsMessage('Cleared stored API key.');
+    await loadRuntimeStatus();
+  } catch (error) {
+    setAppSettingsMessage('Could not clear the stored API key.');
+  }
+}
+
 function buildPayload(formData) {
   return {
     goal:
@@ -712,6 +834,30 @@ savePreferencesButton?.addEventListener('click', () => {
   savePreferences();
 });
 
+saveAppSettingsButton?.addEventListener('click', () => {
+  saveAppSettings();
+});
+
+tabButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    switchTab(button.getAttribute('data-tab-target'));
+  });
+});
+
+toggleApiKeyVisibilityButton?.addEventListener('click', () => {
+  const input = document.getElementById('openAiApiKey');
+  if (!input) {
+    return;
+  }
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  toggleApiKeyVisibilityButton.textContent = show ? 'Hide' : 'Show';
+});
+
+clearApiKeyButton?.addEventListener('click', () => {
+  clearStoredApiKey();
+});
+
 async function exportBackup() {
   try {
     const response = await fetch(apiUrl('/api/backup/export'));
@@ -760,11 +906,13 @@ if (copySessionIdButton && sessionIdDisplayNode) {
 }
 
 async function init() {
+  switchTab('overview');
   await loadQuestionnaire();
   bindFieldChangeListeners();
   updateConditionalFields();
   renderResponse(fallbackResponse);
   renderOfflineRuntimeStatus();
+  await loadAppSettings();
   await loadPreferences();
   loadSessions();
   loadRuntimeStatus();

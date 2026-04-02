@@ -13,6 +13,7 @@
   "build": {
     "appId": "com.navagator.desktop",
     "productName": "Navagator",
+    "artifactName": "${productName} Setup ${version}.${ext}",
     "files": [
       "main.js",
       "preload.js",
@@ -28,12 +29,16 @@
       "output": "dist"
     },
     "win": {
+      "icon": "assets\\navagator.ico",
       "target": [
         "nsis"
       ],
       "signAndEditExecutable": false
     },
     "nsis": {
+      "installerIcon": "assets\\navagator.ico",
+      "uninstallerIcon": "assets\\navagator.ico",
+      "installerHeaderIcon": "assets\\navagator.ico",
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
