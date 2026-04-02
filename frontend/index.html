@@ -83,8 +83,13 @@
       <form id="appSettingsForm" class="questionnaire-grid">
         <label class="full-width">
           <span>OpenAI API key</span>
-          <input id="openAiApiKey" name="openai_api_key" type="password" autocomplete="off" placeholder="Paste your API key for OpenAI-backed ranking.">
-          <p class="field-help">Leave blank to keep Navagator in heuristic-only mode.</p>
+          <div class="secret-input-row">
+            <input id="openAiApiKey" name="openai_api_key" type="password" autocomplete="off" placeholder="Paste a new API key to replace the stored one.">
+            <button class="secondary secret-toggle" id="toggleApiKeyVisibility" type="button">Show</button>
+            <button class="secondary secret-toggle secret-toggle--danger" id="clearApiKeyButton" type="button">Clear key</button>
+          </div>
+          <p id="apiKeyPreview" class="field-help">No stored key.</p>
+          <p class="field-help">The key is stored locally only. It is never returned back to the UI or exported in backups.</p>
         </label>
 
         <label>

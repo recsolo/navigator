@@ -9,6 +9,8 @@ from uuid import uuid4
 from .config import get_settings
 from .schemas import (
     AppSettings,
+    AppSettingsUpdate,
+    AppSettingsView,
     RecommendationRequest,
     RecommendationResponse,
     SavedSession,
@@ -334,14 +336,35 @@ def get_app_settings(profile_id: str = "default") -> AppSettings:
     return AppSettings.model_validate(dict(row))
 
 
-def save_app_settings(app_settings: AppSettings) -> AppSettings:
-    normalized_key = (
-        app_settings.openai_api_key.strip()
-        if isinstance(app_settings.openai_api_key, str)
-        else app_settings.openai_api_key
+def mask_api_key(value: str | None) -> str | None:
+    if not value:
+        return None
+    if len(value) <= 6:
+        return "*" * len(value)
+    return f"{value[:3]}...{value[-4:]}"
+
+
+def get_app_settings_view(profile_id: str = "default") -> AppSettingsView:
+    settings = get_app_settings(profile_id)
+    return AppSettingsView(
+        profile_id=settings.profile_id,
+        api_key_configured=bool(settings.openai_api_key),
+        api_key_preview=mask_api_key(settings.openai_api_key),
+        recommendation_model=settings.recommendation_model,
+        recommendation_reasoning_effort=settings.recommendation_reasoning_effort,
+        recommendation_verbosity=settings.recommendation_verbosity,
     )
-    if normalized_key == "":
+
+
+def save_app_settings(app_settings: AppSettingsUpdate) -> AppSettingsView:
+    existing = get_app_settings(app_settings.profile_id)
+    normalized_key = existing.openai_api_key
+    if app_settings.clear_openai_api_key:
         normalized_key = None
+    elif isinstance(app_settings.openai_api_key, str):
+        candidate = app_settings.openai_api_key.strip()
+        if candidate:
+            normalized_key = candidate
 
     with get_connection() as connection:
         connection.execute(
@@ -369,7 +392,7 @@ def save_app_settings(app_settings: AppSettings) -> AppSettings:
         )
         connection.commit()
 
-    return get_app_settings(app_settings.profile_id)
+    return get_app_settings_view(app_settings.profile_id)
 
 
 def list_all_session_ids() -> list[str]:
@@ -397,7 +420,7 @@ def export_full_backup() -> dict[str, Any]:
         "app_version": settings.version,
         "app_name": settings.app_name,
         "database_path": str(settings.database_path),
-        "app_settings": get_app_settings().model_dump(mode="json"),
+        "app_settings": get_app_settings_view().model_dump(mode="json"),
         "preferences": prefs.model_dump(mode="json"),
         "sessions": sessions_out,
     }

@@ -189,6 +189,9 @@ const previewSubmitButton = document.getElementById('previewSubmitButton');
 const appSettingsForm = document.getElementById('appSettingsForm');
 const saveAppSettingsButton = document.getElementById('saveAppSettingsButton');
 const appSettingsStatusNode = document.getElementById('appSettingsStatus');
+const toggleApiKeyVisibilityButton = document.getElementById('toggleApiKeyVisibility');
+const clearApiKeyButton = document.getElementById('clearApiKeyButton');
+const apiKeyPreviewNode = document.getElementById('apiKeyPreview');
 const runtimeBackendNode = document.getElementById('runtimeBackend');
 const runtimeEngineNode = document.getElementById('runtimeEngine');
 const runtimeProfileNode = document.getElementById('runtimeProfile');
@@ -624,13 +627,18 @@ function fillAppSettingsForm(payload) {
   if (!appSettingsForm) {
     return;
   }
-  document.getElementById('openAiApiKey').value = payload.openai_api_key || '';
+  document.getElementById('openAiApiKey').value = '';
   document.getElementById('recommendationModel').value =
     payload.recommendation_model || 'gpt-5.4';
   document.getElementById('reasoningEffort').value =
     payload.recommendation_reasoning_effort || 'low';
   document.getElementById('responseVerbosity').value =
     payload.recommendation_verbosity || 'low';
+  if (apiKeyPreviewNode) {
+    apiKeyPreviewNode.textContent = payload.api_key_configured
+      ? `Stored key: ${payload.api_key_preview || 'configured'}`
+      : 'No stored key.';
+  }
 }
 
 async function loadAppSettings() {
@@ -658,6 +666,7 @@ async function saveAppSettings() {
   const payload = {
     profile_id: 'default',
     openai_api_key: formData.get('openai_api_key') || null,
+    clear_openai_api_key: false,
     recommendation_model: formData.get('recommendation_model') || 'gpt-5.4',
     recommendation_reasoning_effort:
       formData.get('recommendation_reasoning_effort') || 'low',
@@ -680,6 +689,34 @@ async function saveAppSettings() {
     await loadRuntimeStatus();
   } catch (error) {
     setAppSettingsMessage('Could not save local engine settings.');
+  }
+}
+
+async function clearStoredApiKey() {
+  try {
+    const response = await fetch(apiUrl('/api/app-settings'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        profile_id: 'default',
+        clear_openai_api_key: true,
+        recommendation_model:
+          document.getElementById('recommendationModel').value || 'gpt-5.4',
+        recommendation_reasoning_effort:
+          document.getElementById('reasoningEffort').value || 'low',
+        recommendation_verbosity:
+          document.getElementById('responseVerbosity').value || 'low'
+      })
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const saved = await response.json();
+    fillAppSettingsForm(saved);
+    setAppSettingsMessage('Cleared stored API key.');
+    await loadRuntimeStatus();
+  } catch (error) {
+    setAppSettingsMessage('Could not clear the stored API key.');
   }
 }
 
@@ -786,6 +823,20 @@ savePreferencesButton?.addEventListener('click', () => {
 
 saveAppSettingsButton?.addEventListener('click', () => {
   saveAppSettings();
+});
+
+toggleApiKeyVisibilityButton?.addEventListener('click', () => {
+  const input = document.getElementById('openAiApiKey');
+  if (!input) {
+    return;
+  }
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  toggleApiKeyVisibilityButton.textContent = show ? 'Hide' : 'Show';
+});
+
+clearApiKeyButton?.addEventListener('click', () => {
+  clearStoredApiKey();
 });
 
 async function exportBackup() {

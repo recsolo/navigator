@@ -101,6 +101,7 @@ def test_app_settings_roundtrip(client) -> None:
     payload = {
         "profile_id": "default",
         "openai_api_key": "sk-local-test-key",
+        "clear_openai_api_key": False,
         "recommendation_model": "gpt-5.4",
         "recommendation_reasoning_effort": "medium",
         "recommendation_verbosity": "low",
@@ -111,7 +112,9 @@ def test_app_settings_roundtrip(client) -> None:
     get = client.get("/api/app-settings")
     assert get.status_code == 200
     saved = get.json()
-    assert saved["openai_api_key"] == "sk-local-test-key"
+    assert saved["api_key_configured"] is True
+    assert "openai_api_key" not in saved
+    assert saved["api_key_preview"]
     assert saved["recommendation_reasoning_effort"] == "medium"
 
 
@@ -121,6 +124,7 @@ def test_runtime_status_reflects_saved_app_settings(client) -> None:
         json={
             "profile_id": "default",
             "openai_api_key": "sk-local-test-key",
+            "clear_openai_api_key": False,
             "recommendation_model": "gpt-5.4",
             "recommendation_reasoning_effort": "low",
             "recommendation_verbosity": "medium",
@@ -131,3 +135,22 @@ def test_runtime_status_reflects_saved_app_settings(client) -> None:
     body = response.json()
     assert body["api_key_configured"] is True
     assert body["model_name"] == "gpt-5.4"
+
+
+def test_backup_export_does_not_expose_api_key(client) -> None:
+    client.put(
+        "/api/app-settings",
+        json={
+            "profile_id": "default",
+            "openai_api_key": "sk-local-test-key",
+            "clear_openai_api_key": False,
+            "recommendation_model": "gpt-5.4",
+            "recommendation_reasoning_effort": "low",
+            "recommendation_verbosity": "medium",
+        },
+    )
+    response = client.get("/api/backup/export")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["app_settings"]["api_key_configured"] is True
+    assert "openai_api_key" not in body["app_settings"]

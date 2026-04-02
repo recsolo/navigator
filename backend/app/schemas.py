@@ -62,6 +62,24 @@ class AppSettings(BaseModel):
     recommendation_verbosity: Literal["low", "medium", "high"] = "low"
 
 
+class AppSettingsUpdate(BaseModel):
+    profile_id: str = "default"
+    openai_api_key: str | None = None
+    clear_openai_api_key: bool = False
+    recommendation_model: str = "gpt-5.4"
+    recommendation_reasoning_effort: Literal["low", "medium", "high"] = "low"
+    recommendation_verbosity: Literal["low", "medium", "high"] = "low"
+
+
+class AppSettingsView(BaseModel):
+    profile_id: str = "default"
+    api_key_configured: bool = False
+    api_key_preview: str | None = None
+    recommendation_model: str = "gpt-5.4"
+    recommendation_reasoning_effort: Literal["low", "medium", "high"] = "low"
+    recommendation_verbosity: Literal["low", "medium", "high"] = "low"
+
+
 class Recommendation(BaseModel):
     tool: Tool
     score: int
