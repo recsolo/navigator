@@ -7,14 +7,16 @@ from fastapi.responses import JSONResponse
 from .config import get_settings
 from .db import (
     export_full_backup,
+    get_app_settings,
     get_preferences,
     get_saved_session,
     init_db,
     list_saved_sessions,
+    save_app_settings,
     save_preferences,
     save_session,
 )
-from .schemas import RecommendationRequest, UserPreferences
+from .schemas import AppSettings, RecommendationRequest, UserPreferences
 from .services.recommendations import (
     get_questionnaire,
     get_runtime_status,
@@ -83,6 +85,16 @@ def session_detail(session_id: str):
 @app.get("/api/preferences")
 def preferences():
     return get_preferences()
+
+
+@app.get("/api/app-settings")
+def app_settings():
+    return get_app_settings(settings.local_profile_id)
+
+
+@app.put("/api/app-settings")
+def update_app_settings(payload: AppSettings):
+    return save_app_settings(payload)
 
 
 @app.put("/api/preferences")

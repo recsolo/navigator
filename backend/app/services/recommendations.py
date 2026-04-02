@@ -4,7 +4,9 @@ from pathlib import Path
 import re
 
 from ..config import get_settings
+from ..db import get_app_settings
 from ..schemas import (
+    AppSettings,
     QuestionnaireQuestion,
     Recommendation,
     RecommendationRequest,
@@ -144,6 +146,11 @@ def get_questionnaire() -> list[QuestionnaireQuestion]:
     return QUESTIONNAIRE
 
 
+def get_effective_app_settings(profile_id: str | None = None) -> AppSettings:
+    settings = get_settings()
+    return get_app_settings(profile_id or settings.local_profile_id)
+
+
 def update_runtime_state(
     *, engine_mode: str, model_name: str | None, engine_note: str | None
 ) -> None:
@@ -156,23 +163,24 @@ def update_runtime_state(
 
 def get_runtime_status(profile_id: str | None = None) -> RuntimeStatus:
     settings = get_settings()
-    default_note = "OpenAI-backed ranking is ready." if settings.openai_api_key else (
-        "OPENAI_API_KEY is not configured. Navagator is using local heuristic mode."
+    app_settings = get_effective_app_settings(profile_id)
+    default_note = "OpenAI-backed ranking is ready." if app_settings.openai_api_key else (
+        "OpenAI API key is not configured. Navagator is using local heuristic mode."
     )
 
-    if settings.openai_api_key and OpenAI is None:
+    if app_settings.openai_api_key and OpenAI is None:
         default_note = "The OpenAI Python package is missing, so Navagator is using local heuristic mode."
 
     model_name = _RUNTIME_STATE["model_name"]
-    if not model_name and settings.openai_api_key and OpenAI is not None:
-        model_name = settings.recommendation_model
+    if not model_name and app_settings.openai_api_key and OpenAI is not None:
+        model_name = app_settings.recommendation_model
 
     return RuntimeStatus(
         backend_status="online",
         engine_mode=_RUNTIME_STATE["engine_mode"] or "heuristic",
         model_name=model_name,
         engine_note=_RUNTIME_STATE["engine_note"] or default_note,
-        api_key_configured=bool(settings.openai_api_key),
+        api_key_configured=bool(app_settings.openai_api_key),
         profile_id=profile_id or settings.local_profile_id,
         database_path=str(settings.database_path),
         catalog_path=str(settings.data_path),
@@ -525,19 +533,18 @@ def extract_json_payload(raw_text: str) -> dict:
 
 
 def build_openai_response(
-    req: RecommendationRequest, catalog: list[Tool]
+    req: RecommendationRequest, catalog: list[Tool], app_settings: AppSettings
 ) -> RecommendationResponse:
-    settings = get_settings()
-    if not settings.openai_api_key:
-        raise RuntimeError("OPENAI_API_KEY is not configured.")
+    if not app_settings.openai_api_key:
+        raise RuntimeError("OpenAI API key is not configured.")
     if OpenAI is None:
         raise RuntimeError("The OpenAI package is not installed.")
 
-    client = OpenAI(api_key=settings.openai_api_key)
+    client = OpenAI(api_key=app_settings.openai_api_key)
     response = client.responses.create(
-        model=settings.recommendation_model,
-        reasoning={"effort": settings.recommendation_reasoning_effort},
-        text={"verbosity": settings.recommendation_verbosity},
+        model=app_settings.recommendation_model,
+        reasoning={"effort": app_settings.recommendation_reasoning_effort},
+        text={"verbosity": app_settings.recommendation_verbosity},
         input=build_openai_prompt(req, catalog),
     )
 
@@ -585,18 +592,19 @@ def build_openai_response(
         recommendations=ranked,
         workflow=workflow,
         engine_mode="openai",
-        model_name=settings.recommendation_model,
-        engine_note=f"Recommendations were generated with {settings.recommendation_model}.",
+        model_name=app_settings.recommendation_model,
+        engine_note=f"Recommendations were generated with {app_settings.recommendation_model}.",
     )
 
 
 def recommend(req: RecommendationRequest) -> RecommendationResponse:
     settings = get_settings()
     catalog = load_catalog()
+    app_settings = get_effective_app_settings(settings.local_profile_id)
 
-    if settings.openai_api_key and OpenAI is not None:
+    if app_settings.openai_api_key and OpenAI is not None:
         try:
-            response = build_openai_response(req, catalog)
+            response = build_openai_response(req, catalog, app_settings)
             update_runtime_state(
                 engine_mode="openai",
                 model_name=response.model_name,
@@ -613,10 +621,10 @@ def recommend(req: RecommendationRequest) -> RecommendationResponse:
             )
             return response
 
-    if settings.openai_api_key and OpenAI is None:
-        note = "OPENAI_API_KEY is set, but the OpenAI Python package is missing. Using local heuristic mode."
+    if app_settings.openai_api_key and OpenAI is None:
+        note = "OpenAI API key is set, but the OpenAI Python package is missing. Using local heuristic mode."
     else:
-        note = "OPENAI_API_KEY is not configured. Using local heuristic mode."
+        note = "OpenAI API key is not configured. Using local heuristic mode."
 
     response = build_heuristic_response(req, catalog, engine_note=note)
     update_runtime_state(

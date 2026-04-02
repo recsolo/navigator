@@ -186,6 +186,9 @@ const workflowList = document.getElementById('workflowList');
 const sessionList = document.getElementById('sessionList');
 const savePreferencesButton = document.getElementById('savePreferencesButton');
 const previewSubmitButton = document.getElementById('previewSubmitButton');
+const appSettingsForm = document.getElementById('appSettingsForm');
+const saveAppSettingsButton = document.getElementById('saveAppSettingsButton');
+const appSettingsStatusNode = document.getElementById('appSettingsStatus');
 const runtimeBackendNode = document.getElementById('runtimeBackend');
 const runtimeEngineNode = document.getElementById('runtimeEngine');
 const runtimeProfileNode = document.getElementById('runtimeProfile');
@@ -486,6 +489,12 @@ function setStatusMessage(message) {
   }
 }
 
+function setAppSettingsMessage(message) {
+  if (appSettingsStatusNode) {
+    appSettingsStatusNode.textContent = message;
+  }
+}
+
 function renderRuntimeStatus(payload) {
   runtimeBackendNode.textContent = payload.backend_status || 'offline';
   runtimeEngineNode.textContent =
@@ -611,6 +620,69 @@ async function loadRuntimeStatus() {
   }
 }
 
+function fillAppSettingsForm(payload) {
+  if (!appSettingsForm) {
+    return;
+  }
+  document.getElementById('openAiApiKey').value = payload.openai_api_key || '';
+  document.getElementById('recommendationModel').value =
+    payload.recommendation_model || 'gpt-5.4';
+  document.getElementById('reasoningEffort').value =
+    payload.recommendation_reasoning_effort || 'low';
+  document.getElementById('responseVerbosity').value =
+    payload.recommendation_verbosity || 'low';
+}
+
+async function loadAppSettings() {
+  if (!appSettingsForm) {
+    return;
+  }
+  try {
+    const response = await fetch(apiUrl('/api/app-settings'));
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    fillAppSettingsForm(payload);
+    setAppSettingsMessage('Loaded local engine settings.');
+  } catch (error) {
+    setAppSettingsMessage('Could not load local engine settings.');
+  }
+}
+
+async function saveAppSettings() {
+  if (!appSettingsForm) {
+    return;
+  }
+  const formData = new FormData(appSettingsForm);
+  const payload = {
+    profile_id: 'default',
+    openai_api_key: formData.get('openai_api_key') || null,
+    recommendation_model: formData.get('recommendation_model') || 'gpt-5.4',
+    recommendation_reasoning_effort:
+      formData.get('recommendation_reasoning_effort') || 'low',
+    recommendation_verbosity:
+      formData.get('recommendation_verbosity') || 'low'
+  };
+
+  try {
+    const response = await fetch(apiUrl('/api/app-settings'), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const saved = await response.json();
+    fillAppSettingsForm(saved);
+    setAppSettingsMessage('Saved local engine settings.');
+    await loadRuntimeStatus();
+  } catch (error) {
+    setAppSettingsMessage('Could not save local engine settings.');
+  }
+}
+
 function buildPayload(formData) {
   return {
     goal:
@@ -712,6 +784,10 @@ savePreferencesButton?.addEventListener('click', () => {
   savePreferences();
 });
 
+saveAppSettingsButton?.addEventListener('click', () => {
+  saveAppSettings();
+});
+
 async function exportBackup() {
   try {
     const response = await fetch(apiUrl('/api/backup/export'));
@@ -765,6 +841,7 @@ async function init() {
   updateConditionalFields();
   renderResponse(fallbackResponse);
   renderOfflineRuntimeStatus();
+  await loadAppSettings();
   await loadPreferences();
   loadSessions();
   loadRuntimeStatus();

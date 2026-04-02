@@ -95,3 +95,39 @@ def test_preferences_roundtrip(client) -> None:
     saved = get.json()
     assert saved["goal"] == "Test saved mission text"
     assert saved["budget"] == "free"
+
+
+def test_app_settings_roundtrip(client) -> None:
+    payload = {
+        "profile_id": "default",
+        "openai_api_key": "sk-local-test-key",
+        "recommendation_model": "gpt-5.4",
+        "recommendation_reasoning_effort": "medium",
+        "recommendation_verbosity": "low",
+    }
+    put = client.put("/api/app-settings", json=payload)
+    assert put.status_code == 200
+
+    get = client.get("/api/app-settings")
+    assert get.status_code == 200
+    saved = get.json()
+    assert saved["openai_api_key"] == "sk-local-test-key"
+    assert saved["recommendation_reasoning_effort"] == "medium"
+
+
+def test_runtime_status_reflects_saved_app_settings(client) -> None:
+    client.put(
+        "/api/app-settings",
+        json={
+            "profile_id": "default",
+            "openai_api_key": "sk-local-test-key",
+            "recommendation_model": "gpt-5.4",
+            "recommendation_reasoning_effort": "low",
+            "recommendation_verbosity": "medium",
+        },
+    )
+    response = client.get("/api/runtime-status")
+    assert response.status_code == 200
+    body = response.json()
+    assert body["api_key_configured"] is True
+    assert body["model_name"] == "gpt-5.4"

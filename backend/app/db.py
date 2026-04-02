@@ -7,7 +7,14 @@ from typing import Any
 from uuid import uuid4
 
 from .config import get_settings
-from .schemas import RecommendationRequest, RecommendationResponse, SavedSession, SavedSessionDetail, UserPreferences
+from .schemas import (
+    AppSettings,
+    RecommendationRequest,
+    RecommendationResponse,
+    SavedSession,
+    SavedSessionDetail,
+    UserPreferences,
+)
 
 
 def get_connection() -> sqlite3.Connection:
@@ -61,6 +68,17 @@ def init_db() -> None:
                 install_preference TEXT NOT NULL,
                 pain_points_json TEXT NOT NULL,
                 constraints TEXT
+            )
+            """
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS app_settings (
+                profile_id TEXT PRIMARY KEY,
+                openai_api_key TEXT,
+                recommendation_model TEXT NOT NULL,
+                recommendation_reasoning_effort TEXT NOT NULL,
+                recommendation_verbosity TEXT NOT NULL
             )
             """
         )
@@ -287,6 +305,73 @@ def save_preferences(preferences: UserPreferences) -> UserPreferences:
     return get_preferences(preferences.profile_id)
 
 
+def get_app_settings(profile_id: str = "default") -> AppSettings:
+    settings = get_settings()
+    with get_connection() as connection:
+        row = connection.execute(
+            """
+            SELECT
+                profile_id,
+                openai_api_key,
+                recommendation_model,
+                recommendation_reasoning_effort,
+                recommendation_verbosity
+            FROM app_settings
+            WHERE profile_id = ?
+            """,
+            (profile_id,),
+        ).fetchone()
+
+    if row is None:
+        return AppSettings(
+            profile_id=profile_id,
+            openai_api_key=settings.openai_api_key,
+            recommendation_model=settings.recommendation_model,
+            recommendation_reasoning_effort=settings.recommendation_reasoning_effort,
+            recommendation_verbosity=settings.recommendation_verbosity,
+        )
+
+    return AppSettings.model_validate(dict(row))
+
+
+def save_app_settings(app_settings: AppSettings) -> AppSettings:
+    normalized_key = (
+        app_settings.openai_api_key.strip()
+        if isinstance(app_settings.openai_api_key, str)
+        else app_settings.openai_api_key
+    )
+    if normalized_key == "":
+        normalized_key = None
+
+    with get_connection() as connection:
+        connection.execute(
+            """
+            INSERT INTO app_settings (
+                profile_id,
+                openai_api_key,
+                recommendation_model,
+                recommendation_reasoning_effort,
+                recommendation_verbosity
+            ) VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(profile_id) DO UPDATE SET
+                openai_api_key = excluded.openai_api_key,
+                recommendation_model = excluded.recommendation_model,
+                recommendation_reasoning_effort = excluded.recommendation_reasoning_effort,
+                recommendation_verbosity = excluded.recommendation_verbosity
+            """,
+            (
+                app_settings.profile_id,
+                normalized_key,
+                app_settings.recommendation_model,
+                app_settings.recommendation_reasoning_effort,
+                app_settings.recommendation_verbosity,
+            ),
+        )
+        connection.commit()
+
+    return get_app_settings(app_settings.profile_id)
+
+
 def list_all_session_ids() -> list[str]:
     with get_connection() as connection:
         rows = connection.execute(
@@ -312,6 +397,7 @@ def export_full_backup() -> dict[str, Any]:
         "app_version": settings.version,
         "app_name": settings.app_name,
         "database_path": str(settings.database_path),
+        "app_settings": get_app_settings().model_dump(mode="json"),
         "preferences": prefs.model_dump(mode="json"),
         "sessions": sessions_out,
     }

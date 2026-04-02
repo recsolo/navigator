@@ -54,6 +54,14 @@ class UserPreferences(BaseModel):
     constraints: str | None = None
 
 
+class AppSettings(BaseModel):
+    profile_id: str = "default"
+    openai_api_key: str | None = None
+    recommendation_model: str = "gpt-5.4"
+    recommendation_reasoning_effort: Literal["low", "medium", "high"] = "low"
+    recommendation_verbosity: Literal["low", "medium", "high"] = "low"
+
+
 class Recommendation(BaseModel):
     tool: Tool
     score: int

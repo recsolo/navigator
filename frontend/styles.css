@@ -408,6 +408,10 @@ textarea:focus-visible {
   margin-bottom: 18px;
 }
 
+.settings-card {
+  margin-bottom: 18px;
+}
+
 .runtime-strip__head {
   margin-bottom: 18px;
 }
@@ -571,6 +575,12 @@ select {
   background: rgba(167, 139, 250, 0.1);
   color: var(--violet);
   border: 1px solid rgba(167, 139, 250, 0.35);
+}
+
+.status-pill--subtle {
+  background: rgba(0, 245, 212, 0.08);
+  color: #9cefe4;
+  border-color: rgba(0, 245, 212, 0.18);
 }
 
 .stack-list,

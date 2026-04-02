@@ -71,6 +71,52 @@
       </div>
     </section>
 
+    <section class="app-card app-card--wide settings-card" id="settings">
+      <div class="section-head">
+        <div>
+          <p class="section-label">Settings</p>
+          <h2>Local engine settings</h2>
+        </div>
+        <p class="helper-text">These values are stored locally for this desktop app profile and drive the recommendation engine.</p>
+      </div>
+
+      <form id="appSettingsForm" class="questionnaire-grid">
+        <label class="full-width">
+          <span>OpenAI API key</span>
+          <input id="openAiApiKey" name="openai_api_key" type="password" autocomplete="off" placeholder="Paste your API key for OpenAI-backed ranking.">
+          <p class="field-help">Leave blank to keep Navagator in heuristic-only mode.</p>
+        </label>
+
+        <label>
+          <span>Model</span>
+          <input id="recommendationModel" name="recommendation_model" type="text" value="gpt-5.4" placeholder="gpt-5.4">
+        </label>
+
+        <label>
+          <span>Reasoning effort</span>
+          <select id="reasoningEffort" name="recommendation_reasoning_effort">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Verbosity</span>
+          <select id="responseVerbosity" name="recommendation_verbosity">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+
+        <div class="form-actions full-width">
+          <button class="secondary" id="saveAppSettingsButton" type="button">Save engine settings</button>
+          <span id="appSettingsStatus" class="status-pill status-pill--subtle">Local settings not loaded yet.</span>
+        </div>
+      </form>
+    </section>
+
     <main class="layout-grid">
       <section class="app-card app-card--wide form-card" id="questionnaire">
         <div class="section-head">
