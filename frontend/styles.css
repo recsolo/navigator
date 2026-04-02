@@ -332,6 +332,13 @@ button.primary:hover {
   box-shadow: 0 0 32px rgba(0, 245, 212, 0.25), 0 8px 32px rgba(0, 0, 0, 0.35);
 }
 
+.primary.is-loading,
+.secondary.is-loading,
+button.primary.is-loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .primary:focus-visible,
 .secondary:focus-visible,
 button:focus-visible,

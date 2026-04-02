@@ -42,3 +42,21 @@ def test_score_tool_flags_budget_mismatch_for_free_user() -> None:
     )
     rec = score_tool(cursor, req)
     assert any("budget" in c.lower() for c in rec.cautions) or rec.score <= 0
+
+
+def test_extract_json_payload_handles_triple_backticks() -> None:
+    raw = "```json\n{\"a\": 1}\n```"
+    from app.services.recommendations import extract_json_payload
+
+    result = extract_json_payload(raw)
+    assert result == {"a": 1}
+
+
+def test_extract_json_payload_raises_value_error() -> None:
+    raw = "Not a JSON payload"
+    from app.services.recommendations import extract_json_payload
+
+    import pytest
+
+    with pytest.raises(ValueError, match="not valid JSON"):
+        extract_json_payload(raw)

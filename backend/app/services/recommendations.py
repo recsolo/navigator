@@ -525,11 +525,18 @@ def extract_json_payload(raw_text: str) -> dict:
 
     try:
         return json.loads(cleaned)
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as exc:
         match = re.search(r"\{.*\}", cleaned, re.DOTALL)
         if not match:
-            raise
-        return json.loads(match.group(0))
+            raise ValueError(
+                "OpenAI engine output was not valid JSON and no JSON object could be extracted"
+            ) from exc
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError as exc2:
+            raise ValueError(
+                "OpenAI engine output contained malformed JSON payload in extracted block"
+            ) from exc2
 
 
 def build_openai_response(
@@ -548,7 +555,11 @@ def build_openai_response(
         input=build_openai_prompt(req, catalog),
     )
 
-    payload = extract_json_payload(response.output_text)
+    raw_output = getattr(response, "output_text", None)
+    if not raw_output:
+        raise ValueError("OpenAI response is missing output text.")
+
+    payload = extract_json_payload(raw_output)
     tool_map = {tool.id: tool for tool in catalog}
 
     recommendations_payload = payload.get("recommendations", [])

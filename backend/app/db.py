@@ -27,7 +27,17 @@ from .schemas import (
 def get_connection() -> sqlite3.Connection:
     settings = get_settings()
     settings.database_path.parent.mkdir(parents=True, exist_ok=True)
-    connection = sqlite3.connect(settings.database_path)
+
+    try:
+        connection = sqlite3.connect(settings.database_path)
+    except sqlite3.DatabaseError:
+        # Corrupt DB recovery: preserve damaged file and recreate
+        fallback = settings.database_path.with_suffix(
+            f"{settings.database_path.suffix}.corrupt"
+        )
+        settings.database_path.replace(fallback)
+        connection = sqlite3.connect(settings.database_path)
+
     connection.row_factory = sqlite3.Row
     return connection
 

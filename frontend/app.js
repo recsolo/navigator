@@ -759,6 +759,30 @@ function setPreviewLoading(loading) {
   previewSubmitButton.classList.toggle('is-loading', loading);
 }
 
+function validateQuestionnaire(formData) {
+  const requiredFields = [
+    'goal',
+    'skill_level',
+    'budget',
+    'workflow_style',
+    'timeline',
+    'primary_outcome',
+    'team_context',
+    'install_preference',
+  ];
+
+  const missing = requiredFields.filter((field) => !formData.get(field));
+
+  if (missing.length) {
+    setStatusMessage(
+      `Please complete the required fields before generating a preview: ${missing.join(', ')}`
+    );
+    return false;
+  }
+
+  return true;
+}
+
 async function savePreferences() {
   const formData = new FormData(form);
   const payload = { profile_id: 'default', ...buildPayload(formData) };
@@ -797,6 +821,10 @@ async function loadPreferences() {
 }
 
 async function requestPreview(formData) {
+  if (!validateQuestionnaire(formData)) {
+    return;
+  }
+
   const body = buildPayload(formData);
   setPreviewLoading(true);
   try {
