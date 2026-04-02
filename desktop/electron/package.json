@@ -1,6 +1,6 @@
 {
   "name": "navagator-desktop",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "author": "Mike Nance",
   "description": "Electron shell for the Navagator local-first app",
