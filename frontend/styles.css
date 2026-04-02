@@ -700,6 +700,28 @@ select {
   border: 1px solid rgba(167, 139, 250, 0.35);
 }
 
+.status-pill--success {
+  background: rgba(0, 245, 212, 0.13);
+  color: var(--cyan);
+  border-color: rgba(0, 245, 212, 0.35);
+}
+
+.status-pill--error {
+  background: rgba(251, 113, 133, 0.13);
+  color: var(--danger);
+  border-color: rgba(251, 113, 133, 0.35);
+}
+
+.form-error {
+  margin: 8px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.1);
+  border-radius: 10px;
+  color: #ffccd5;
+  font-size: 0.86rem;
+}
+
 .status-pill--subtle {
   background: rgba(0, 245, 212, 0.08);
   color: #9cefe4;
@@ -715,7 +737,19 @@ select {
 
 .stack-item {
   padding: 20px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border-color: rgba(120, 200, 255, 0.22);
+}
+
+.stack-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 0 1px rgba(0, 245, 212, 0.22), 0 24px 54px rgba(0, 0, 0, 0.4);
+  border-color: rgba(0, 245, 212, 0.45);
+}
+
+.stack-item--featured {
+  border: 1px solid rgba(0, 245, 212, 0.5);
+  background: rgba(0, 245, 212, 0.06);
 }
 
 .stack-item:hover {

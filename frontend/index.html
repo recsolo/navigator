@@ -88,8 +88,10 @@
           <p class="helper-text">Briefing fields are built from <code class="inline-code">GET /api/questionnaire</code> so the UI stays aligned with the backend schema.</p>
         </div>
 
-        <form id="questionnaireForm">
+        <form id="questionnaireForm" novalidate>
           <div id="questionnaireFields" class="questionnaire-grid" aria-busy="false"></div>
+
+          <p id="formError" class="form-error" aria-live="assertive" hidden></p>
 
           <div class="form-actions full-width">
             <button class="primary" type="submit" id="previewSubmitButton"><span class="btn-shine"></span>Generate preview</button>

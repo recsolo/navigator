@@ -499,10 +499,34 @@ function renderResponse(payload) {
   updateSessionBanner(payload.session_id || null);
 }
 
-function setStatusMessage(message) {
-  if (statusNode) {
-    statusNode.textContent = message;
+function setStatusMessage(message, error = false) {
+  if (!statusNode) {
+    return;
   }
+  statusNode.textContent = message;
+  statusNode.classList.toggle('status-pill--error', Boolean(error));
+  statusNode.classList.toggle('status-pill--success', !error);
+}
+
+function showFormError(message) {
+  const formError = document.getElementById('formError');
+  if (!formError) {
+    return;
+  }
+  formError.textContent = message;
+  formError.hidden = !message;
+  if (message) {
+    formError.focus();
+  }
+}
+
+function clearFormError() {
+  const formError = document.getElementById('formError');
+  if (!formError) {
+    return;
+  }
+  formError.hidden = true;
+  formError.textContent = '';
 }
 
 function setAppSettingsMessage(message) {
@@ -774,12 +798,14 @@ function validateQuestionnaire(formData) {
   const missing = requiredFields.filter((field) => !formData.get(field));
 
   if (missing.length) {
-    setStatusMessage(
-      `Please complete the required fields before generating a preview: ${missing.join(', ')}`
-    );
+    const message = `Please complete the required fields before generating a preview: ${missing.join(', ')}`;
+    setStatusMessage(message, true);
+    showFormError(message);
     return false;
   }
 
+  clearFormError();
+  setStatusMessage('Looks good — generating preview...', false);
   return true;
 }
 
@@ -844,7 +870,8 @@ async function requestPreview(formData) {
     await loadSessions();
     await loadRuntimeStatus();
   } catch (error) {
-    setStatusMessage('Backend unavailable, showing local fallback preview.');
+    setStatusMessage('Backend unavailable, showing local fallback preview.', true);
+    showFormError('Unable to connect to backend. Showing offline heuristic preview.');
     renderResponse(fallbackResponse);
     renderOfflineRuntimeStatus();
   } finally {
