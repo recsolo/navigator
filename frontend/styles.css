@@ -404,6 +404,34 @@ textarea:focus-visible {
   padding: 26px;
 }
 
+.view-tabs {
+  display: inline-flex;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 8px;
+  border-radius: 999px;
+  background: rgba(8, 11, 20, 0.7);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-glow);
+}
+
+.view-tab {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.view-tab.is-active {
+  background: rgba(0, 245, 212, 0.12);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px rgba(0, 245, 212, 0.18);
+}
+
 .runtime-strip {
   margin-bottom: 18px;
 }
@@ -850,13 +878,6 @@ select {
   padding: 2px 6px;
   border-radius: 6px;
   background: rgba(0, 245, 212, 0.08);
-}
-
-.field-help {
-  margin: 0 0 8px;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  color: var(--ink-soft);
 }
 
 .engine-meta {

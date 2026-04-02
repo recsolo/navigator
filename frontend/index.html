@@ -43,86 +43,41 @@
       </aside>
     </header>
 
-    <section class="runtime-strip app-card app-card--wide" aria-label="Desktop runtime status">
-      <div class="section-head runtime-strip__head">
-        <div>
-          <p class="section-label">Runtime status</p>
-          <h2>Desktop state</h2>
-        </div>
-        <p id="runtimeNote" class="helper-text">Waiting for backend status.</p>
-      </div>
-      <div class="runtime-grid">
-        <article class="runtime-pill">
-          <p class="runtime-pill__label">Backend</p>
-          <h3 id="runtimeBackend">Checking...</h3>
-        </article>
-        <article class="runtime-pill">
-          <p class="runtime-pill__label">Engine</p>
-          <h3 id="runtimeEngine">Checking...</h3>
-        </article>
-        <article class="runtime-pill">
-          <p class="runtime-pill__label">Profile</p>
-          <h3 id="runtimeProfile">default</h3>
-        </article>
-        <article class="runtime-pill runtime-pill--path">
-          <p class="runtime-pill__label">Database</p>
-          <h3 id="runtimeDatabase">Waiting...</h3>
-        </article>
-      </div>
-    </section>
+    <nav class="view-tabs" aria-label="App views">
+      <button class="view-tab is-active" type="button" data-tab-target="overview">Overview</button>
+      <button class="view-tab" type="button" data-tab-target="settings">Settings</button>
+    </nav>
 
-    <section class="app-card app-card--wide settings-card" id="settings">
-      <div class="section-head">
-        <div>
-          <p class="section-label">Settings</p>
-          <h2>Local engine settings</h2>
-        </div>
-        <p class="helper-text">These values are stored locally for this desktop app profile and drive the recommendation engine.</p>
-      </div>
-
-      <form id="appSettingsForm" class="questionnaire-grid">
-        <label class="full-width">
-          <span>OpenAI API key</span>
-          <div class="secret-input-row">
-            <input id="openAiApiKey" name="openai_api_key" type="password" autocomplete="off" placeholder="Paste a new API key to replace the stored one.">
-            <button class="secondary secret-toggle" id="toggleApiKeyVisibility" type="button">Show</button>
-            <button class="secondary secret-toggle secret-toggle--danger" id="clearApiKeyButton" type="button">Clear key</button>
+    <section data-tab-panel="overview">
+      <section class="runtime-strip app-card app-card--wide" aria-label="Desktop runtime status">
+        <div class="section-head runtime-strip__head">
+          <div>
+            <p class="section-label">Runtime status</p>
+            <h2>Desktop state</h2>
           </div>
-          <p id="apiKeyPreview" class="field-help">No stored key.</p>
-          <p class="field-help">The key is stored locally only. It is never returned back to the UI or exported in backups.</p>
-        </label>
-
-        <label>
-          <span>Model</span>
-          <input id="recommendationModel" name="recommendation_model" type="text" value="gpt-5.4" placeholder="gpt-5.4">
-        </label>
-
-        <label>
-          <span>Reasoning effort</span>
-          <select id="reasoningEffort" name="recommendation_reasoning_effort">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </label>
-
-        <label>
-          <span>Verbosity</span>
-          <select id="responseVerbosity" name="recommendation_verbosity">
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </label>
-
-        <div class="form-actions full-width">
-          <button class="secondary" id="saveAppSettingsButton" type="button">Save engine settings</button>
-          <span id="appSettingsStatus" class="status-pill status-pill--subtle">Local settings not loaded yet.</span>
+          <p id="runtimeNote" class="helper-text">Waiting for backend status.</p>
         </div>
-      </form>
-    </section>
+        <div class="runtime-grid">
+          <article class="runtime-pill">
+            <p class="runtime-pill__label">Backend</p>
+            <h3 id="runtimeBackend">Checking...</h3>
+          </article>
+          <article class="runtime-pill">
+            <p class="runtime-pill__label">Engine</p>
+            <h3 id="runtimeEngine">Checking...</h3>
+          </article>
+          <article class="runtime-pill">
+            <p class="runtime-pill__label">Profile</p>
+            <h3 id="runtimeProfile">default</h3>
+          </article>
+          <article class="runtime-pill runtime-pill--path">
+            <p class="runtime-pill__label">Database</p>
+            <h3 id="runtimeDatabase">Waiting...</h3>
+          </article>
+        </div>
+      </section>
 
-    <main class="layout-grid">
+      <main class="layout-grid">
       <section class="app-card app-card--wide form-card" id="questionnaire">
         <div class="section-head">
           <div>
@@ -211,7 +166,59 @@
           </article>
         </div>
       </section>
-    </main>
+      </main>
+    </section>
+
+    <section class="app-card app-card--wide settings-card" id="settings" data-tab-panel="settings" hidden>
+      <div class="section-head">
+        <div>
+          <p class="section-label">Settings</p>
+          <h2>Local engine settings</h2>
+        </div>
+        <p class="helper-text">These values are stored locally for this desktop app profile and drive the recommendation engine.</p>
+      </div>
+
+      <form id="appSettingsForm" class="questionnaire-grid">
+        <label class="full-width">
+          <span>OpenAI API key</span>
+          <div class="secret-input-row">
+            <input id="openAiApiKey" name="openai_api_key" type="password" autocomplete="off" placeholder="Paste a new API key to replace the stored one.">
+            <button class="secondary secret-toggle" id="toggleApiKeyVisibility" type="button">Show</button>
+            <button class="secondary secret-toggle secret-toggle--danger" id="clearApiKeyButton" type="button">Clear key</button>
+          </div>
+          <p id="apiKeyPreview" class="field-help">No stored key.</p>
+          <p class="field-help">The key is stored locally in an encrypted machine-level secret file. It is never returned to the UI or exported in backups.</p>
+        </label>
+
+        <label>
+          <span>Model</span>
+          <input id="recommendationModel" name="recommendation_model" type="text" value="gpt-5.4" placeholder="gpt-5.4">
+        </label>
+
+        <label>
+          <span>Reasoning effort</span>
+          <select id="reasoningEffort" name="recommendation_reasoning_effort">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Verbosity</span>
+          <select id="responseVerbosity" name="recommendation_verbosity">
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+
+        <div class="form-actions full-width">
+          <button class="secondary" id="saveAppSettingsButton" type="button">Save engine settings</button>
+          <span id="appSettingsStatus" class="status-pill status-pill--subtle">Local settings not loaded yet.</span>
+        </div>
+      </form>
+    </section>
   </div>
   <script src="app.js"></script>
 </body>

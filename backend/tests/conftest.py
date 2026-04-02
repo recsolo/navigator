@@ -6,6 +6,8 @@ import pytest
 @pytest.fixture
 def client(tmp_path, monkeypatch):
     monkeypatch.setenv("NAVAGATOR_DATABASE_PATH", str(tmp_path / "test_navagator.db"))
+    monkeypatch.setenv("NAVAGATOR_APP_DATA_DIR", str(tmp_path / "appdata"))
+    monkeypatch.setenv("OPENAI_API_KEY", "")
     import app.config as config_module
 
     config_module.get_settings.cache_clear()

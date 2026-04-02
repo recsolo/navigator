@@ -7,6 +7,11 @@ from typing import Any
 from uuid import uuid4
 
 from .config import get_settings
+from .secure_store import (
+    clear_openai_api_key,
+    read_openai_api_key,
+    write_openai_api_key,
+)
 from .schemas import (
     AppSettings,
     AppSettingsUpdate,
@@ -327,13 +332,34 @@ def get_app_settings(profile_id: str = "default") -> AppSettings:
     if row is None:
         return AppSettings(
             profile_id=profile_id,
-            openai_api_key=settings.openai_api_key,
+            openai_api_key=read_openai_api_key() or settings.openai_api_key,
             recommendation_model=settings.recommendation_model,
             recommendation_reasoning_effort=settings.recommendation_reasoning_effort,
             recommendation_verbosity=settings.recommendation_verbosity,
         )
+    payload = dict(row)
+    database_key = payload.pop("openai_api_key", None)
+    stored_key = read_openai_api_key()
+    if not stored_key and database_key:
+        write_openai_api_key(database_key)
+        stored_key = database_key
+        with get_connection() as connection:
+            connection.execute(
+                """
+                UPDATE app_settings
+                SET openai_api_key = NULL
+                WHERE profile_id = ?
+                """,
+                (profile_id,),
+            )
+            connection.commit()
 
-    return AppSettings.model_validate(dict(row))
+    return AppSettings.model_validate(
+        {
+            **payload,
+            "openai_api_key": stored_key or settings.openai_api_key,
+        }
+    )
 
 
 def mask_api_key(value: str | None) -> str | None:
@@ -361,10 +387,12 @@ def save_app_settings(app_settings: AppSettingsUpdate) -> AppSettingsView:
     normalized_key = existing.openai_api_key
     if app_settings.clear_openai_api_key:
         normalized_key = None
+        clear_openai_api_key()
     elif isinstance(app_settings.openai_api_key, str):
         candidate = app_settings.openai_api_key.strip()
         if candidate:
             normalized_key = candidate
+            write_openai_api_key(candidate)
 
     with get_connection() as connection:
         connection.execute(
@@ -384,7 +412,7 @@ def save_app_settings(app_settings: AppSettingsUpdate) -> AppSettingsView:
             """,
             (
                 app_settings.profile_id,
-                normalized_key,
+                None,
                 app_settings.recommendation_model,
                 app_settings.recommendation_reasoning_effort,
                 app_settings.recommendation_verbosity,

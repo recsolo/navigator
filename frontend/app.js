@@ -178,6 +178,8 @@ function apiUrl(pathname) {
 }
 
 const form = document.getElementById('questionnaireForm');
+const tabButtons = Array.from(document.querySelectorAll('[data-tab-target]'));
+const tabPanels = Array.from(document.querySelectorAll('[data-tab-panel]'));
 const statusNode = document.getElementById('apiStatus');
 const summaryHeading = document.getElementById('summaryHeading');
 const summaryText = document.getElementById('summaryText');
@@ -204,6 +206,17 @@ const copySessionIdButton = document.getElementById('copySessionId');
 const exportBackupButton = document.getElementById('exportBackupButton');
 
 let questionnaireShowWhen = {};
+
+function switchTab(target) {
+  tabButtons.forEach((button) => {
+    const active = button.getAttribute('data-tab-target') === target;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  tabPanels.forEach((panel) => {
+    panel.hidden = panel.getAttribute('data-tab-panel') !== target;
+  });
+}
 
 function fieldIdToDomId(fieldId) {
   return fieldId.replace(/_([a-z])/g, (_, ch) => ch.toUpperCase());
@@ -825,6 +838,12 @@ saveAppSettingsButton?.addEventListener('click', () => {
   saveAppSettings();
 });
 
+tabButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    switchTab(button.getAttribute('data-tab-target'));
+  });
+});
+
 toggleApiKeyVisibilityButton?.addEventListener('click', () => {
   const input = document.getElementById('openAiApiKey');
   if (!input) {
@@ -887,6 +906,7 @@ if (copySessionIdButton && sessionIdDisplayNode) {
 }
 
 async function init() {
+  switchTab('overview');
   await loadQuestionnaire();
   bindFieldChangeListeners();
   updateConditionalFields();

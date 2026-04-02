@@ -154,3 +154,32 @@ def test_backup_export_does_not_expose_api_key(client) -> None:
     body = response.json()
     assert body["app_settings"]["api_key_configured"] is True
     assert "openai_api_key" not in body["app_settings"]
+
+
+def test_clear_app_settings_key(client) -> None:
+    client.put(
+        "/api/app-settings",
+        json={
+            "profile_id": "default",
+            "openai_api_key": "sk-local-test-key",
+            "clear_openai_api_key": False,
+            "recommendation_model": "gpt-5.4",
+            "recommendation_reasoning_effort": "low",
+            "recommendation_verbosity": "medium",
+        },
+    )
+    cleared = client.put(
+        "/api/app-settings",
+        json={
+            "profile_id": "default",
+            "openai_api_key": "",
+            "clear_openai_api_key": True,
+            "recommendation_model": "gpt-5.4",
+            "recommendation_reasoning_effort": "low",
+            "recommendation_verbosity": "medium",
+        },
+    )
+    assert cleared.status_code == 200
+    body = cleared.json()
+    assert body["api_key_configured"] is False
+    assert body["api_key_preview"] is None
