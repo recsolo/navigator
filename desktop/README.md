@@ -59,7 +59,7 @@ Outputs:
 - unpacked app: `desktop/electron/dist/win-unpacked/`
 - bundled backend exe: `desktop/dist-backend/navagator-backend.exe`
 
-### Packaged app data (SQLite)
+### Packaged app data and secrets
 
 When the app is **installed/built** (`app.isPackaged` is true), Electron sets:
 
@@ -67,6 +67,8 @@ When the app is **installed/built** (`app.isPackaged` is true), Electron sets:
 - `NAVAGATOR_DATABASE_PATH` → `<userData>/navagator.db`
 
 So session history and preferences persist per user profile, not next to the executable.
+
+On Windows, OpenAI API keys are stored in Windows Credential Manager under a Navagator-specific generic credential. Tests and non-Windows fallback paths use app-data files instead.
 
 Development mode (`npm start`) leaves these unset so the backend uses its default database path under `backend/app/data/`.
 
@@ -78,4 +80,4 @@ See `docs/RELEASE_CHECKLIST.md` for version bumps, CI, smoke tests, and installe
 
 After the local guidance loop is stable:
 - decide whether to stay on Electron or migrate to Tauri
-- add icon, publisher metadata, and code signing for release distribution
+- add publisher metadata and code signing for release distribution

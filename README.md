@@ -26,8 +26,10 @@ This repo now includes:
 - workflow preview generation
 - saved session history in SQLite
 - separate stored user defaults / preferences
+- Windows Credential Manager storage for local OpenAI API keys
 - desktop shell scaffold that can start the local Python backend automatically
 - desktop runtime status bar showing backend state, active engine, profile, and database path
+- custom Windows app and installer icon
 - Windows installer packaging output under `desktop/electron/dist/`
 
 ## Environment
@@ -50,6 +52,6 @@ Windows installer build:
 ## Next build priorities
 
 1. Add richer profile management instead of only the default local profile.
-2. Add a first-run settings flow for API key entry and model selection inside the desktop app.
-3. Replace the current flat tool catalog with scraper-fed or curated updates.
-4. Add a custom icon, publisher metadata, and code-signing for release builds.
+2. Replace the current flat tool catalog with scraper-fed or curated updates.
+3. Add publisher metadata and code-signing for release builds.
+4. Add multi-profile support instead of a single default profile.

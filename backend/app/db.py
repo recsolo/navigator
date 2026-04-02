@@ -332,16 +332,16 @@ def get_app_settings(profile_id: str = "default") -> AppSettings:
     if row is None:
         return AppSettings(
             profile_id=profile_id,
-            openai_api_key=read_openai_api_key() or settings.openai_api_key,
+            openai_api_key=read_openai_api_key(profile_id) or settings.openai_api_key,
             recommendation_model=settings.recommendation_model,
             recommendation_reasoning_effort=settings.recommendation_reasoning_effort,
             recommendation_verbosity=settings.recommendation_verbosity,
         )
     payload = dict(row)
     database_key = payload.pop("openai_api_key", None)
-    stored_key = read_openai_api_key()
+    stored_key = read_openai_api_key(profile_id)
     if not stored_key and database_key:
-        write_openai_api_key(database_key)
+        write_openai_api_key(profile_id, database_key)
         stored_key = database_key
         with get_connection() as connection:
             connection.execute(
@@ -387,12 +387,12 @@ def save_app_settings(app_settings: AppSettingsUpdate) -> AppSettingsView:
     normalized_key = existing.openai_api_key
     if app_settings.clear_openai_api_key:
         normalized_key = None
-        clear_openai_api_key()
+        clear_openai_api_key(app_settings.profile_id)
     elif isinstance(app_settings.openai_api_key, str):
         candidate = app_settings.openai_api_key.strip()
         if candidate:
             normalized_key = candidate
-            write_openai_api_key(candidate)
+            write_openai_api_key(app_settings.profile_id, candidate)
 
     with get_connection() as connection:
         connection.execute(

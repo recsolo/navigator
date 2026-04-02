@@ -4,6 +4,7 @@ app/config.py
 app/db.py
 app/main.py
 app/schemas.py
+app/secure_store.py
 app/services/recommendations.py
 navagator_backend.egg-info/PKG-INFO
 navagator_backend.egg-info/SOURCES.txt
