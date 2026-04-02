@@ -16,10 +16,13 @@
     "artifactName": "${productName} Setup ${version}.${ext}",
     "files": [
       "main.js",
-      "preload.js",
-      "..\\..\\frontend\\**\\*"
+      "preload.js"
     ],
     "extraResources": [
+      {
+        "from": "..\\..\\frontend",
+        "to": "frontend"
+      },
       {
         "from": "..\\dist-backend\\navagator-backend.exe",
         "to": "backend\\navagator-backend.exe"

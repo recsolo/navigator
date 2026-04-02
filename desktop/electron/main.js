@@ -6,7 +6,6 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..', '..');
 const backendDir = path.join(repoRoot, 'backend');
-const frontendEntry = path.join(repoRoot, 'frontend', 'index.html');
 const apiBase = process.env.NAVAGATOR_API_BASE || 'http://127.0.0.1:8000';
 
 let backendProcess = null;
@@ -60,6 +59,13 @@ function resolveBackendCommand() {
     command: 'python',
     extraArgs: ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000', '--app-dir', backendDir]
   };
+}
+
+function resolveFrontendEntry() {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, 'frontend', 'index.html');
+  }
+  return path.join(repoRoot, 'frontend', 'index.html');
 }
 
 function launchBackend() {
@@ -152,7 +158,7 @@ function createWindow() {
     }
   });
 
-  window.loadFile(frontendEntry);
+  window.loadFile(resolveFrontendEntry());
 }
 
 function stopBackend() {
