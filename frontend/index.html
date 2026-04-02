@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-future">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navagator</title>
+  <meta name="description" content="Installable AI guidance software for choosing the right tools and workflows.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="future-backdrop" aria-hidden="true">
+    <div class="future-backdrop__glow future-backdrop__glow--a"></div>
+    <div class="future-backdrop__glow future-backdrop__glow--b"></div>
+    <div class="future-backdrop__grid"></div>
+    <div class="future-backdrop__scan"></div>
+  </div>
+
+  <div class="page-shell">
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="eyebrow__dot"></span> Local-first guidance engine</p>
+        <h1>Pick the right AI stack without drowning in tool noise.</h1>
+        <p class="lede">Navagator is being built as local-first software. Run the briefing, get a tight stack, see why each tool fits, and execute the first workflow worth shipping.</p>
+        <div class="hero-actions">
+          <a class="primary" href="#questionnaire"><span class="btn-shine"></span>Run guidance</a>
+          <a class="secondary" href="#architecture">System layout</a>
+        </div>
+      </div>
+      <aside class="hero-panel">
+        <div class="panel-card status-card">
+          <p class="panel-label">Signal</p>
+          <h2>Build <span class="accent-numeral">0.1</span></h2>
+          <ul class="status-list">
+            <li><span class="status-pip"></span>Questionnaire schema</li>
+            <li><span class="status-pip"></span>Recommendation preview API</li>
+            <li><span class="status-pip"></span>Workflow starter output</li>
+            <li><span class="status-pip"></span>Desktop shell + backend auto-start</li>
+          </ul>
+        </div>
+      </aside>
+    </header>
+
+    <section class="runtime-strip app-card app-card--wide" aria-label="Desktop runtime status">
+      <div class="section-head runtime-strip__head">
+        <div>
+          <p class="section-label">Runtime status</p>
+          <h2>Desktop state</h2>
+        </div>
+        <p id="runtimeNote" class="helper-text">Waiting for backend status.</p>
+      </div>
+      <div class="runtime-grid">
+        <article class="runtime-pill">
+          <p class="runtime-pill__label">Backend</p>
+          <h3 id="runtimeBackend">Checking...</h3>
+        </article>
+        <article class="runtime-pill">
+          <p class="runtime-pill__label">Engine</p>
+          <h3 id="runtimeEngine">Checking...</h3>
+        </article>
+        <article class="runtime-pill">
+          <p class="runtime-pill__label">Profile</p>
+          <h3 id="runtimeProfile">default</h3>
+        </article>
+        <article class="runtime-pill runtime-pill--path">
+          <p class="runtime-pill__label">Database</p>
+          <h3 id="runtimeDatabase">Waiting...</h3>
+        </article>
+      </div>
+    </section>
+
+    <main class="layout-grid">
+      <section class="app-card app-card--wide form-card" id="questionnaire">
+        <div class="section-head">
+          <div>
+            <p class="section-label">Briefing</p>
+            <h2>Describe the job, not the hype.</h2>
+          </div>
+          <p class="helper-text">Briefing fields are built from <code class="inline-code">GET /api/questionnaire</code> so the UI stays aligned with the backend schema.</p>
+        </div>
+
+        <form id="questionnaireForm">
+          <div id="questionnaireFields" class="questionnaire-grid" aria-busy="false"></div>
+
+          <div class="form-actions full-width">
+            <button class="primary" type="submit" id="previewSubmitButton"><span class="btn-shine"></span>Generate preview</button>
+            <button class="secondary" id="savePreferencesButton" type="button">Save defaults</button>
+            <span id="apiStatus" class="status-pill" role="status" aria-live="polite">Using fallback mode until backend is running.</span>
+          </div>
+        </form>
+      </section>
+
+      <section class="app-card summary-card">
+        <p class="section-label">Synthesis</p>
+        <h2 id="summaryHeading">Start with a narrow stack and one clear workflow.</h2>
+        <p id="summaryText">Navagator will rank the first tools to try based on the job, budget, skill level, and preferred workflow style.</p>
+        <p id="engineMeta" class="engine-meta" hidden></p>
+        <div id="sessionBanner" class="session-banner" hidden>
+          <div class="session-banner__text">
+            <span class="session-banner__label">Saved locally</span>
+            <code id="sessionIdDisplay" class="session-banner__code"></code>
+          </div>
+          <button type="button" id="copySessionId" class="session-banner__copy">Copy id</button>
+        </div>
+      </section>
+
+      <section class="app-card recommendations-card">
+        <div class="section-head">
+          <div>
+            <p class="section-label">Ranked stack</p>
+            <h2>Recommended tools</h2>
+          </div>
+        </div>
+        <div id="recommendationList" class="stack-list"></div>
+      </section>
+
+      <section class="app-card workflow-card">
+        <div class="section-head">
+          <div>
+            <p class="section-label">Execution path</p>
+            <h2>First run path</h2>
+          </div>
+        </div>
+        <ol id="workflowList" class="workflow-list"></ol>
+      </section>
+
+      <section class="app-card history-card">
+        <div class="section-head">
+          <div>
+            <p class="section-label">Saved runs</p>
+            <h2>Recent local sessions</h2>
+          </div>
+          <div class="history-actions">
+            <p class="helper-text">Every preview is stored locally in SQLite so the desktop app can build history over time.</p>
+            <button type="button" class="secondary" id="exportBackupButton">Export JSON backup</button>
+          </div>
+        </div>
+        <div id="sessionList" class="session-list">
+          <p class="session-empty">No saved sessions loaded yet.</p>
+        </div>
+      </section>
+
+      <section class="app-card architecture-card app-card--wide" id="architecture">
+        <p class="section-label">Architecture</p>
+        <h2>Built local-first, packaged later.</h2>
+        <div class="blueprint">
+          <article>
+            <h3>Frontend shell</h3>
+            <p>Questionnaire, recommendations, and workflow UI live in `frontend/` so Cursor and Codex can iterate quickly.</p>
+          </article>
+          <article>
+            <h3>Python backend</h3>
+            <p>FastAPI in `backend/` owns questionnaire schema, scoring, and workflow generation with explicit logic.</p>
+          </article>
+          <article>
+            <h3>Desktop shell</h3>
+            <p>Electron loads `frontend/`, starts the FastAPI backend (venv or bundled exe), and stores SQLite under the app user data path when packaged.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

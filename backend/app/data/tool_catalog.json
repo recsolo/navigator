@@ -1,0 +1,74 @@
+[
+  {
+    "id": "chatgpt",
+    "name": "ChatGPT",
+    "category": "assistant",
+    "price_band": "low",
+    "skill_fit": ["beginner", "intermediate", "advanced"],
+    "workflow_styles": ["fast execution", "deep research", "content production"],
+    "use_cases": ["research", "writing", "planning"],
+    "description": "General-purpose AI assistant for drafting, research, and structured thinking.",
+    "strengths": ["fast iteration", "broad task coverage", "good onboarding"],
+    "best_for": "Best when you need a flexible first tool to reduce blank-page friction fast."
+  },
+  {
+    "id": "perplexity",
+    "name": "Perplexity",
+    "category": "research",
+    "price_band": "low",
+    "skill_fit": ["beginner", "intermediate", "advanced"],
+    "workflow_styles": ["deep research", "fast execution"],
+    "use_cases": ["research", "competitive analysis", "fact finding"],
+    "description": "Research-first AI search tool with fast source-backed exploration.",
+    "strengths": ["source visibility", "fast discovery", "good comparison work"],
+    "best_for": "Best when accuracy and current information matter more than heavy customization."
+  },
+  {
+    "id": "notion",
+    "name": "Notion",
+    "category": "workspace",
+    "price_band": "low",
+    "skill_fit": ["beginner", "intermediate"],
+    "workflow_styles": ["content production", "automation", "fast execution"],
+    "use_cases": ["documentation", "content planning", "knowledge base"],
+    "description": "Workspace tool for organizing notes, workflows, projects, and repeatable operating systems.",
+    "strengths": ["organization", "templates", "team handoff"],
+    "best_for": "Best when the user needs a simple operating layer without much technical setup."
+  },
+  {
+    "id": "zapier",
+    "name": "Zapier",
+    "category": "automation",
+    "price_band": "mid",
+    "skill_fit": ["beginner", "intermediate"],
+    "workflow_styles": ["automation", "fast execution"],
+    "use_cases": ["automation", "lead routing", "notifications"],
+    "description": "No-code automation platform for connecting apps and triggering repeatable actions.",
+    "strengths": ["broad integrations", "fast setup", "non-technical use"],
+    "best_for": "Best when speed matters and the workflow should run without custom engineering."
+  },
+  {
+    "id": "cursor",
+    "name": "Cursor",
+    "category": "builder",
+    "price_band": "mid",
+    "skill_fit": ["intermediate", "advanced"],
+    "workflow_styles": ["fast execution", "content production"],
+    "use_cases": ["coding", "shipping prototypes", "editing codebases"],
+    "description": "AI-native editor for building and modifying software quickly inside a repo.",
+    "strengths": ["repo awareness", "fast code edits", "inline iteration"],
+    "best_for": "Best when the user needs to turn plans into code and iterate directly in the project."
+  },
+  {
+    "id": "make",
+    "name": "Make",
+    "category": "automation",
+    "price_band": "mid",
+    "skill_fit": ["intermediate", "advanced"],
+    "workflow_styles": ["automation"],
+    "use_cases": ["automation", "data movement", "multi-step orchestration"],
+    "description": "Visual automation platform for more complex branching and app orchestration.",
+    "strengths": ["visual flows", "more control", "complex automation"],
+    "best_for": "Best when the workflow needs more branching than simple one-trigger automations."
+  }
+]

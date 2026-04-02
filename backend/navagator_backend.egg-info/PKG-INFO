@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: navagator-backend
+Version: 0.1.0
+Summary: Local-first backend for the Navagator AI guidance engine
+Requires-Python: >=3.11
+Requires-Dist: fastapi<1.0.0,>=0.116.0
+Requires-Dist: openai<2.0.0,>=1.108.0
+Requires-Dist: uvicorn[standard]<1.0.0,>=0.35.0
+Requires-Dist: pydantic<3.0.0,>=2.11.0
+Provides-Extra: build
+Requires-Dist: pyinstaller<7.0.0,>=6.15.0; extra == "build"
+Provides-Extra: dev
+Requires-Dist: httpx<1.0.0,>=0.28.0; extra == "dev"
+Requires-Dist: pytest<9.0.0,>=8.0.0; extra == "dev"

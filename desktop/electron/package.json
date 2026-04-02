@@ -1,0 +1,45 @@
+{
+  "name": "navagator-desktop",
+  "version": "0.1.0",
+  "private": true,
+  "author": "Mike Nance",
+  "description": "Electron shell for the Navagator local-first app",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:backend": "\"..\\..\\.venv\\Scripts\\python.exe\" ..\\build_backend.py",
+    "dist:win": "npm run build:backend && set CSC_IDENTITY_AUTO_DISCOVERY=false&& electron-builder --win nsis"
+  },
+  "build": {
+    "appId": "com.navagator.desktop",
+    "productName": "Navagator",
+    "files": [
+      "main.js",
+      "preload.js",
+      "..\\..\\frontend\\**\\*"
+    ],
+    "extraResources": [
+      {
+        "from": "..\\dist-backend\\navagator-backend.exe",
+        "to": "backend\\navagator-backend.exe"
+      }
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
+  "devDependencies": {
+    "electron": "^37.0.0",
+    "electron-builder": "^26.0.12"
+  }
+}
