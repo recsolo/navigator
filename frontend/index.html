@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <a class="skip-link" href="#questionnaire">Skip to questionnaire</a>
   <div class="future-backdrop" aria-hidden="true">
     <div class="future-backdrop__glow future-backdrop__glow--a"></div>
     <div class="future-backdrop__glow future-backdrop__glow--b"></div>
@@ -18,8 +19,8 @@
     <div class="future-backdrop__scan"></div>
   </div>
 
-  <div class="page-shell">
-    <header class="hero">
+  <main class="page-shell" id="mainContent">
+    <header class="hero" role="banner">
       <div class="hero-copy">
         <p class="eyebrow"><span class="eyebrow__dot"></span> Local-first guidance engine</p>
         <h1>Pick the right AI stack without drowning in tool noise.</h1>
@@ -43,9 +44,9 @@
       </aside>
     </header>
 
-    <nav class="view-tabs" aria-label="App views">
-      <button class="view-tab is-active" type="button" data-tab-target="overview">Overview</button>
-      <button class="view-tab" type="button" data-tab-target="settings">Settings</button>
+    <nav class="view-tabs" aria-label="App views" role="tablist">
+      <button class="view-tab is-active" type="button" data-tab-target="overview" role="tab" aria-selected="true">Overview</button>
+      <button class="view-tab" type="button" data-tab-target="settings" role="tab" aria-selected="false">Settings</button>
     </nav>
 
     <section data-tab-panel="overview">
@@ -169,7 +170,7 @@
       </main>
     </section>
 
-    <section class="app-card app-card--wide settings-card" id="settings" data-tab-panel="settings" hidden>
+    <section class="app-card app-card--wide settings-card" id="settings" data-tab-panel="settings" hidden role="region" aria-labelledby="settingsHeading">
       <div class="section-head">
         <div>
           <p class="section-label">Settings</p>
@@ -219,7 +220,8 @@
         </div>
       </form>
     </section>
-  </div>
+  </main>
+  <footer aria-hidden="true"></footer>
   <script src="app.js"></script>
 </body>
 </html>

@@ -844,6 +844,29 @@ tabButtons.forEach((button) => {
   });
 });
 
+// Keyboard navigation for tab list: Left/Right arrows move focus between tabs
+tabButtons.forEach((button, idx) => {
+  button.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const dir = e.key === 'ArrowRight' ? 1 : -1;
+      const next = (idx + dir + tabButtons.length) % tabButtons.length;
+      tabButtons[next].focus();
+      switchTab(tabButtons[next].getAttribute('data-tab-target'));
+    }
+    if (e.key === 'Home') {
+      e.preventDefault();
+      tabButtons[0].focus();
+      switchTab(tabButtons[0].getAttribute('data-tab-target'));
+    }
+    if (e.key === 'End') {
+      e.preventDefault();
+      tabButtons[tabButtons.length - 1].focus();
+      switchTab(tabButtons[tabButtons.length - 1].getAttribute('data-tab-target'));
+    }
+  });
+});
+
 toggleApiKeyVisibilityButton?.addEventListener('click', () => {
   const input = document.getElementById('openAiApiKey');
   if (!input) {
