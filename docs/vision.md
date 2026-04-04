@@ -1,6 +1,6 @@
-﻿# Navagator Vision
+# Navigator Vision
 
-Navagator is installable software for people overwhelmed by AI tool sprawl.
+Navigator is installable software for entrepreneurs and self-directed operators who want to stop wasting time and money on the wrong AI tools.
 
 ## Promise
 
@@ -11,7 +11,7 @@ Give each user a practical answer to three questions:
 
 ## Product shape
 
-Navagator should feel like a personal guidance engine, not a tool directory.
+Navigator should feel like a practical decision app, not a tool directory.
 
 The user gives:
 - goal
@@ -20,7 +20,7 @@ The user gives:
 - workflow preference
 - time constraints
 
-Navagator returns:
+Navigator returns:
 - top recommended tools
 - fit explanation
 - comparison logic

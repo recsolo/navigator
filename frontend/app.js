@@ -1,6 +1,6 @@
 const fallbackResponse = {
   summary:
-    'Navagator recommends a short stack for researching, planning, and shipping your first result without paying for too many overlapping tools.',
+    'Navigator recommends a short stack that fits your goal, budget, and workflow so you can stop guessing and start moving.',
   recommendations: [
     {
       tool: {
@@ -128,7 +128,7 @@ const QUESTIONNAIRE_FALLBACK = [
     required: true,
     options: ['local-first', 'cloud-ok', 'no preference'],
     help_text:
-      'This helps Navagator favor installable and privacy-sensitive workflows when needed.',
+      'This helps Navigator favor installable and privacy-sensitive workflows when needed.',
     show_when: {
       workflow_style: ['automation', 'fast execution', 'deep research']
     }
@@ -171,56 +171,16 @@ const FIELD_DEFAULTS = {
   install_preference: 'local-first'
 };
 
-const apiBase = window.navagatorDesktop?.apiBase || 'http://127.0.0.1:8000';
-
-const VIEW_META = {
-  briefing: {
-    eyebrow: 'Briefing',
-    title: 'Define the job before the tools.',
-    description:
-      'Start with the problem, shape your defaults, and generate guidance only when the brief is specific enough to be useful.'
-  },
-  recommendations: {
-    eyebrow: 'Stack',
-    title: 'Review the current recommended stack.',
-    description:
-      'See the ranked tools, comparison notes, and the first execution path without the questionnaire taking over the whole screen.'
-  },
-  sessions: {
-    eyebrow: 'History',
-    title: 'Review what you have already run.',
-    description:
-      'Load prior local sessions, compare outcomes, and export the workspace state when you need a backup.'
-  },
-  runtime: {
-    eyebrow: 'Status',
-    title: 'Check the current app state.',
-    description:
-      'See whether live guidance is connected, which guidance mode is active, and where your saved data lives.'
-  },
-  settings: {
-    eyebrow: 'Settings',
-    title: 'Control guidance without cluttering the work surface.',
-    description:
-      'Manage your access key and guidance style in a dedicated settings screen.'
-  }
-};
+const apiBase = window.navigatorDesktop?.apiBase || window.navagatorDesktop?.apiBase || 'http://127.0.0.1:8000';
 
 function apiUrl(pathname) {
   return `${apiBase}${pathname}`;
 }
 
 const form = document.getElementById('questionnaireForm');
-const navButtons = Array.from(document.querySelectorAll('[data-view-target]'));
-const viewPanels = Array.from(document.querySelectorAll('[data-view-panel]'));
-const stackButtons = Array.from(document.querySelectorAll('[data-stack-target]'));
-const stackPanels = Array.from(document.querySelectorAll('[data-stack-panel]'));
-const briefingButtons = Array.from(document.querySelectorAll('[data-briefing-target]'));
-const briefingPanels = Array.from(document.querySelectorAll('[data-briefing-panel]'));
+const tabButtons = Array.from(document.querySelectorAll('[data-tab-target]'));
+const tabPanels = Array.from(document.querySelectorAll('[data-tab-panel]'));
 const statusNode = document.getElementById('apiStatus');
-const viewEyebrowNode = document.getElementById('viewEyebrow');
-const viewTitleNode = document.getElementById('viewTitle');
-const viewDescriptionNode = document.getElementById('viewDescription');
 const summaryHeading = document.getElementById('summaryHeading');
 const summaryText = document.getElementById('summaryText');
 const recommendationList = document.getElementById('recommendationList');
@@ -244,58 +204,17 @@ const sessionBannerNode = document.getElementById('sessionBanner');
 const sessionIdDisplayNode = document.getElementById('sessionIdDisplay');
 const copySessionIdButton = document.getElementById('copySessionId');
 const exportBackupButton = document.getElementById('exportBackupButton');
-const profileGoalNode = document.getElementById('profileGoal');
-const profileTimelineNode = document.getElementById('profileTimeline');
-const profileWorkflowStyleNode = document.getElementById('profileWorkflowStyle');
-const profileInstallPreferenceNode = document.getElementById('profileInstallPreference');
-const profilePainPointsNode = document.getElementById('profilePainPoints');
 
 let questionnaireShowWhen = {};
-let activeStackView = 'summary';
-let activeBriefingView = 'questionnaire';
 
-function switchView(target) {
-  const meta = VIEW_META[target] || VIEW_META.briefing;
-  navButtons.forEach((button) => {
-    const active = button.getAttribute('data-view-target') === target;
+function switchTab(target) {
+  tabButtons.forEach((button) => {
+    const active = button.getAttribute('data-tab-target') === target;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-selected', active ? 'true' : 'false');
   });
-  viewPanels.forEach((panel) => {
-    panel.hidden = panel.getAttribute('data-view-panel') !== target;
-  });
-  if (viewEyebrowNode) {
-    viewEyebrowNode.textContent = meta.eyebrow;
-  }
-  if (viewTitleNode) {
-    viewTitleNode.textContent = meta.title;
-  }
-  if (viewDescriptionNode) {
-    viewDescriptionNode.textContent = meta.description;
-  }
-}
-
-function switchStackView(target) {
-  activeStackView = target;
-  stackButtons.forEach((button) => {
-    const active = button.getAttribute('data-stack-target') === target;
-    button.classList.toggle('is-active', active);
-    button.setAttribute('aria-selected', active ? 'true' : 'false');
-  });
-  stackPanels.forEach((panel) => {
-    panel.hidden = panel.getAttribute('data-stack-panel') !== target;
-  });
-}
-
-function switchBriefingView(target) {
-  activeBriefingView = target;
-  briefingButtons.forEach((button) => {
-    const active = button.getAttribute('data-briefing-target') === target;
-    button.classList.toggle('is-active', active);
-    button.setAttribute('aria-selected', active ? 'true' : 'false');
-  });
-  briefingPanels.forEach((panel) => {
-    panel.hidden = panel.getAttribute('data-briefing-panel') !== target;
+  tabPanels.forEach((panel) => {
+    panel.hidden = panel.getAttribute('data-tab-panel') !== target;
   });
 }
 
@@ -308,20 +227,6 @@ function titleCaseWords(value) {
     .split(/\s+/)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
-}
-
-function prettyValue(value, fallback = 'Not set yet') {
-  if (value == null) {
-    return fallback;
-  }
-  if (Array.isArray(value)) {
-    return value.length ? value.map((item) => titleCaseWords(String(item))).join(', ') : fallback;
-  }
-  const normalized = String(value).trim();
-  if (!normalized) {
-    return fallback;
-  }
-  return titleCaseWords(normalized.replace(/[-_]/g, ' '));
 }
 
 function escapeHtml(raw) {
@@ -568,7 +473,7 @@ function updateEngineMeta(payload) {
     engineMetaNode.hidden = false;
     return;
   }
-  engineMetaNode.textContent = 'Engine: Local heuristic ranking';
+  engineMetaNode.textContent = 'Engine: Local fallback ranking';
   engineMetaNode.hidden = false;
 }
 
@@ -586,7 +491,7 @@ function updateSessionBanner(sessionId) {
 }
 
 function renderResponse(payload) {
-  summaryHeading.textContent = 'Your stack preview is ready.';
+  summaryHeading.textContent = 'Your recommended stack is ready.';
   summaryText.textContent = payload.summary;
   renderRecommendations(payload.recommendations || []);
   renderWorkflow(payload.workflow || []);
@@ -594,11 +499,7 @@ function renderResponse(payload) {
   updateSessionBanner(payload.session_id || null);
 }
 
-function setStatusMessage(message) {
-  setStatusMessageWithState(message, false);
-}
-
-function setStatusMessageWithState(message, error = false) {
+function setStatusMessage(message, error = false) {
   if (!statusNode) {
     return;
   }
@@ -635,16 +536,15 @@ function setAppSettingsMessage(message) {
 }
 
 function renderRuntimeStatus(payload) {
-  runtimeBackendNode.textContent =
-    payload.backend_status === 'online' ? 'Connected' : 'Offline';
+  runtimeBackendNode.textContent = payload.backend_status || 'offline';
   runtimeEngineNode.textContent =
     payload.engine_mode === 'openai'
-      ? `Live guidance${payload.model_name ? ` (${payload.model_name})` : ''}`
-      : 'Offline guidance';
-  runtimeProfileNode.textContent = prettyValue(payload.profile_id, 'Default');
-  runtimeDatabaseNode.textContent = payload.database_path || 'Saved locally on this device';
+      ? `${payload.model_name || 'OpenAI'}`
+      : 'Local heuristic';
+  runtimeProfileNode.textContent = payload.profile_id || 'default';
+  runtimeDatabaseNode.textContent = payload.database_path || 'Unavailable';
   runtimeNoteNode.textContent =
-    payload.engine_note || 'Everything is ready.';
+    payload.engine_note || 'Runtime status is available.';
 }
 
 function renderOfflineRuntimeStatus() {
@@ -652,30 +552,10 @@ function renderOfflineRuntimeStatus() {
     backend_status: 'offline',
     engine_mode: 'heuristic',
     profile_id: 'default',
-    database_path: 'Saved locally on this device',
-    engine_note: 'Live guidance is offline. You can still use the local planning flow.'
+    database_path: 'Backend unavailable',
+    engine_note:
+      'Backend is offline. Start the local API or launch through the desktop shell.'
   });
-}
-
-function updateProfileSummary(source = {}) {
-  if (profileGoalNode) {
-    profileGoalNode.textContent = source.goal?.trim() || 'No goal captured yet.';
-  }
-  if (profileTimelineNode) {
-    profileTimelineNode.textContent = prettyValue(source.timeline, 'This week');
-  }
-  if (profileWorkflowStyleNode) {
-    profileWorkflowStyleNode.textContent = prettyValue(source.workflow_style, 'Fast execution');
-  }
-  if (profileInstallPreferenceNode) {
-    profileInstallPreferenceNode.textContent = prettyValue(source.install_preference, 'Local first');
-  }
-  if (profilePainPointsNode) {
-    profilePainPointsNode.textContent = prettyValue(
-      source.pain_points,
-      'No pressure points selected yet.'
-    );
-  }
 }
 
 function fillFormFromRequest(request) {
@@ -702,7 +582,6 @@ function fillFormFromRequest(request) {
     input.checked = (request.pain_points || []).includes(input.value);
   });
   updateConditionalFields();
-  updateProfileSummary(request);
 }
 
 function renderSessions(items) {
@@ -742,12 +621,10 @@ function renderSessions(items) {
         const payload = await response.json();
         fillFormFromRequest(payload.request);
         renderResponse(payload.response);
-        setStatusMessage('Loaded a saved session.');
-        switchView('recommendations');
-        switchStackView('summary');
+        setStatusMessage('Loaded a saved local session and restored your previous recommendation.');
         await loadRuntimeStatus();
       } catch (error) {
-        setStatusMessage('Could not load that saved session.');
+        setStatusMessage('Could not load that saved session from the backend.');
       }
     });
   });
@@ -812,9 +689,9 @@ async function loadAppSettings() {
     }
     const payload = await response.json();
     fillAppSettingsForm(payload);
-    setAppSettingsMessage('Loaded your saved settings.');
+    setAppSettingsMessage('Loaded local engine settings.');
   } catch (error) {
-    setAppSettingsMessage('Could not load your saved settings.');
+    setAppSettingsMessage('Could not load local engine settings.');
   }
 }
 
@@ -845,10 +722,10 @@ async function saveAppSettings() {
     }
     const saved = await response.json();
     fillAppSettingsForm(saved);
-    setAppSettingsMessage('Saved your settings.');
+    setAppSettingsMessage('Saved local engine settings.');
     await loadRuntimeStatus();
   } catch (error) {
-    setAppSettingsMessage('Could not save your settings.');
+    setAppSettingsMessage('Could not save local engine settings.');
   }
 }
 
@@ -897,32 +774,6 @@ function buildPayload(formData) {
   };
 }
 
-function validateQuestionnaire(formData) {
-  const requiredFields = [
-    'goal',
-    'skill_level',
-    'budget',
-    'workflow_style',
-    'timeline',
-    'primary_outcome',
-    'team_context',
-    'install_preference'
-  ];
-
-  const missing = requiredFields.filter((field) => !formData.get(field));
-
-  if (missing.length) {
-    const message = `Please complete the required fields before generating a preview: ${missing.join(', ')}`;
-    setStatusMessageWithState(message, true);
-    showFormError(message);
-    return false;
-  }
-
-  clearFormError();
-  setStatusMessageWithState('Looks good - generating preview...', false);
-  return true;
-}
-
 function setPreviewLoading(loading) {
   if (!previewSubmitButton) {
     return;
@@ -932,10 +783,35 @@ function setPreviewLoading(loading) {
   previewSubmitButton.classList.toggle('is-loading', loading);
 }
 
+function validateQuestionnaire(formData) {
+  const requiredFields = [
+    'goal',
+    'skill_level',
+    'budget',
+    'workflow_style',
+    'timeline',
+    'primary_outcome',
+    'team_context',
+    'install_preference',
+  ];
+
+  const missing = requiredFields.filter((field) => !formData.get(field));
+
+  if (missing.length) {
+    const message = `Please complete the required fields before generating a preview: ${missing.join(', ')}`;
+    setStatusMessage(message, true);
+    showFormError(message);
+    return false;
+  }
+
+  clearFormError();
+  setStatusMessage('Looks good — generating preview...', false);
+  return true;
+}
+
 async function savePreferences() {
   const formData = new FormData(form);
   const payload = { profile_id: 'default', ...buildPayload(formData) };
-  updateProfileSummary(payload);
 
   try {
     const response = await fetch(apiUrl('/api/preferences'), {
@@ -948,10 +824,10 @@ async function savePreferences() {
       throw new Error(`HTTP ${response.status}`);
     }
 
-    setStatusMessage('Saved your defaults.');
+    setStatusMessage('Saved your defaults for future runs.');
     await loadRuntimeStatus();
   } catch (error) {
-    setStatusMessage('Could not save defaults right now.');
+    setStatusMessage('Could not save defaults. Backend may be unavailable.');
   }
 }
 
@@ -963,11 +839,10 @@ async function loadPreferences() {
     }
     const payload = await response.json();
     fillFormFromRequest(payload);
-    setStatusMessage('Loaded your saved defaults.');
+    setStatusMessage('Loaded local defaults from backend.');
     await loadRuntimeStatus();
   } catch (error) {
     updateConditionalFields();
-    updateProfileSummary(buildPayload(new FormData(form)));
   }
 }
 
@@ -977,7 +852,6 @@ async function requestPreview(formData) {
   }
 
   const body = buildPayload(formData);
-  updateProfileSummary(body);
   setPreviewLoading(true);
   try {
     const response = await fetch(apiUrl('/api/recommendations/preview'), {
@@ -991,18 +865,14 @@ async function requestPreview(formData) {
     }
 
     const payload = await response.json();
-    setStatusMessage('Guidance is ready.');
+    setStatusMessage('Recommendation ready.');
     renderResponse(payload);
-    switchView('recommendations');
-    switchStackView('summary');
     await loadSessions();
     await loadRuntimeStatus();
   } catch (error) {
-    setStatusMessageWithState('Live guidance is unavailable, showing an offline preview.', true);
-    showFormError('Unable to reach live guidance. Showing an offline preview instead.');
+    setStatusMessage('Backend unavailable, showing a local fallback recommendation.', true);
+    showFormError('Unable to connect to backend. Showing offline heuristic preview.');
     renderResponse(fallbackResponse);
-    switchView('recommendations');
-    switchStackView('summary');
     renderOfflineRuntimeStatus();
   } finally {
     setPreviewLoading(false);
@@ -1023,21 +893,32 @@ saveAppSettingsButton?.addEventListener('click', () => {
   saveAppSettings();
 });
 
-navButtons.forEach((button) => {
+tabButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    switchView(button.getAttribute('data-view-target'));
+    switchTab(button.getAttribute('data-tab-target'));
   });
 });
 
-stackButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    switchStackView(button.getAttribute('data-stack-target'));
-  });
-});
-
-briefingButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    switchBriefingView(button.getAttribute('data-briefing-target'));
+// Keyboard navigation for tab list: Left/Right arrows move focus between tabs
+tabButtons.forEach((button, idx) => {
+  button.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const dir = e.key === 'ArrowRight' ? 1 : -1;
+      const next = (idx + dir + tabButtons.length) % tabButtons.length;
+      tabButtons[next].focus();
+      switchTab(tabButtons[next].getAttribute('data-tab-target'));
+    }
+    if (e.key === 'Home') {
+      e.preventDefault();
+      tabButtons[0].focus();
+      switchTab(tabButtons[0].getAttribute('data-tab-target'));
+    }
+    if (e.key === 'End') {
+      e.preventDefault();
+      tabButtons[tabButtons.length - 1].focus();
+      switchTab(tabButtons[tabButtons.length - 1].getAttribute('data-tab-target'));
+    }
   });
 });
 
@@ -1064,7 +945,7 @@ async function exportBackup() {
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
-    let filename = 'navagator-backup.json';
+    let filename = 'navigator-backup.json';
     const disposition = response.headers.get('Content-Disposition');
     if (disposition) {
       const match = disposition.match(/filename="([^"]+)"/);
@@ -1079,7 +960,7 @@ async function exportBackup() {
     URL.revokeObjectURL(url);
     setStatusMessage('Backup file downloaded.');
   } catch (error) {
-    setStatusMessage('Could not export your backup right now.');
+    setStatusMessage('Could not export backup. Is the backend running?');
   }
 }
 
@@ -1103,13 +984,10 @@ if (copySessionIdButton && sessionIdDisplayNode) {
 }
 
 async function init() {
-  switchView('briefing');
-  switchBriefingView(activeBriefingView);
-  switchStackView(activeStackView);
+  switchTab('overview');
   await loadQuestionnaire();
   bindFieldChangeListeners();
   updateConditionalFields();
-  updateProfileSummary(buildPayload(new FormData(form)));
   renderResponse(fallbackResponse);
   renderOfflineRuntimeStatus();
   await loadAppSettings();

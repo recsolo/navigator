@@ -6,11 +6,20 @@ import sys
 
 from .config import get_settings
 
-SERVICE_NAME = "Navagator"
+SERVICE_NAME = "Navigator"
+LEGACY_SERVICE_NAME = "Navagator"
+
+
+def _get_env(*names: str) -> str | None:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return None
 
 
 def _secret_backend() -> str:
-    explicit = os.getenv("NAVAGATOR_SECRET_BACKEND")
+    explicit = _get_env("NAVIGATOR_SECRET_BACKEND", "NAVAGATOR_SECRET_BACKEND")
     if explicit:
         return explicit.lower()
     if sys.platform == "win32":
@@ -61,7 +70,10 @@ def _read_windows_credential(profile_id: str) -> str | None:
     keyring, _ = _load_keyring()
     if keyring is None:
         return None
-    return keyring.get_password(SERVICE_NAME, _credential_name(profile_id))
+    credential = _credential_name(profile_id)
+    return keyring.get_password(SERVICE_NAME, credential) or keyring.get_password(
+        LEGACY_SERVICE_NAME, credential
+    )
 
 
 def _write_windows_credential(profile_id: str, value: str) -> None:
@@ -75,10 +87,11 @@ def _clear_windows_credential(profile_id: str) -> None:
     keyring, password_delete_error = _load_keyring()
     if keyring is None:
         return
-    try:
-        keyring.delete_password(SERVICE_NAME, _credential_name(profile_id))
-    except password_delete_error:
-        return
+    for service_name in (SERVICE_NAME, LEGACY_SERVICE_NAME):
+        try:
+            keyring.delete_password(service_name, _credential_name(profile_id))
+        except password_delete_error:
+            continue
 
 
 def read_openai_api_key(profile_id: str = "default") -> str | None:

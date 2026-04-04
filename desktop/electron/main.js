@@ -6,7 +6,11 @@ const path = require('path');
 
 const repoRoot = path.resolve(__dirname, '..', '..');
 const backendDir = path.join(repoRoot, 'backend');
-const apiBase = process.env.NAVAGATOR_API_BASE || 'http://127.0.0.1:8000';
+const frontendEntry = path.join(repoRoot, 'frontend', 'index.html');
+const apiBase =
+  process.env.NAVIGATOR_API_BASE ||
+  process.env.NAVAGATOR_API_BASE ||
+  'http://127.0.0.1:8000';
 
 let backendProcess = null;
 
@@ -35,9 +39,18 @@ function resolveBackendCommand() {
     const packagedBackend = path.join(
       process.resourcesPath,
       'backend',
+      'navigator-backend.exe'
+    );
+    if (fs.existsSync(packagedBackend)) {
+      return { command: packagedBackend, extraArgs: [] };
+    }
+
+    const legacyPackagedBackend = path.join(
+      process.resourcesPath,
+      'backend',
       'navagator-backend.exe'
     );
-    return { command: packagedBackend, extraArgs: [] };
+    return { command: legacyPackagedBackend, extraArgs: [] };
   }
 
   const localVenvPython = path.join(repoRoot, '.venv', 'Scripts', 'python.exe');
@@ -48,9 +61,9 @@ function resolveBackendCommand() {
     };
   }
 
-  if (process.env.NAVAGATOR_PYTHON) {
+  if (process.env.NAVIGATOR_PYTHON || process.env.NAVAGATOR_PYTHON) {
     return {
-      command: process.env.NAVAGATOR_PYTHON,
+      command: process.env.NAVIGATOR_PYTHON || process.env.NAVAGATOR_PYTHON,
       extraArgs: ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000', '--app-dir', backendDir]
     };
   }
@@ -59,13 +72,6 @@ function resolveBackendCommand() {
     command: 'python',
     extraArgs: ['-m', 'uvicorn', 'app.main:app', '--host', '127.0.0.1', '--port', '8000', '--app-dir', backendDir]
   };
-}
-
-function resolveFrontendEntry() {
-  if (app.isPackaged) {
-    return path.join(process.resourcesPath, 'frontend', 'index.html');
-  }
-  return path.join(repoRoot, 'frontend', 'index.html');
 }
 
 function launchBackend() {
@@ -79,13 +85,17 @@ function launchBackend() {
   const childEnv = {
     ...process.env,
     PYTHONUTF8: '1',
+    NAVIGATOR_API_BASE: apiBase,
     NAVAGATOR_API_BASE: apiBase,
+    NAVIGATOR_DESKTOP_MODE: 'electron',
     NAVAGATOR_DESKTOP_MODE: 'electron'
   };
   if (app.isPackaged) {
     const userDataPath = app.getPath('userData');
+    childEnv.NAVIGATOR_APP_DATA_DIR = userDataPath;
     childEnv.NAVAGATOR_APP_DATA_DIR = userDataPath;
-    childEnv.NAVAGATOR_DATABASE_PATH = path.join(userDataPath, 'navagator.db');
+    childEnv.NAVIGATOR_DATABASE_PATH = path.join(userDataPath, 'navigator.db');
+    childEnv.NAVAGATOR_DATABASE_PATH = path.join(userDataPath, 'navigator.db');
   }
 
   backendProcess = spawn(backend.command, args, {
@@ -96,17 +106,17 @@ function launchBackend() {
   });
 
   backendProcess.stdout.on('data', (chunk) => {
-    process.stdout.write(`[navagator-backend] ${chunk}`);
+    process.stdout.write(`[navigator-backend] ${chunk}`);
   });
 
   backendProcess.stderr.on('data', (chunk) => {
-    process.stderr.write(`[navagator-backend] ${chunk}`);
+    process.stderr.write(`[navigator-backend] ${chunk}`);
   });
 
   backendProcess.on('error', (error) => {
     backendProcess = null;
     dialog.showErrorBox(
-      'Navagator backend failed to start',
+      'Navigator backend failed to start',
       `Electron could not launch the Python backend.\n\n${error.message}`
     );
   });
@@ -115,7 +125,7 @@ function launchBackend() {
     backendProcess = null;
     if (!app.isQuitting && code !== 0) {
       dialog.showErrorBox(
-        'Navagator backend stopped',
+        'Navigator backend stopped',
         `The local backend exited with code ${code}.`
       );
     }
@@ -138,7 +148,7 @@ async function ensureBackendReady() {
   }
 
   dialog.showErrorBox(
-    'Navagator backend unavailable',
+    'Navigator backend unavailable',
     'The desktop shell could not connect to the local backend. The UI will still open, but API-backed features will stay offline until the backend is fixed.'
   );
 }
@@ -158,7 +168,7 @@ function createWindow() {
     }
   });
 
-  window.loadFile(resolveFrontendEntry());
+  window.loadFile(frontendEntry);
 }
 
 function stopBackend() {

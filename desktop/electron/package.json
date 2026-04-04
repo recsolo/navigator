@@ -1,9 +1,9 @@
 {
-  "name": "navagator-desktop",
+  "name": "navigator-desktop",
   "version": "0.2.0",
   "private": true,
   "author": "Mike Nance",
-  "description": "Electron shell for the Navagator local-first app",
+  "description": "Electron shell for the Navigator local-first app",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -11,21 +11,18 @@
     "dist:win": "npm run build:backend && set CSC_IDENTITY_AUTO_DISCOVERY=false&& electron-builder --win nsis"
   },
   "build": {
-    "appId": "com.navagator.desktop",
-    "productName": "Navagator",
+    "appId": "com.navigator.desktop",
+    "productName": "Navigator",
     "artifactName": "${productName} Setup ${version}.${ext}",
     "files": [
       "main.js",
-      "preload.js"
+      "preload.js",
+      "..\\..\\frontend\\**\\*"
     ],
     "extraResources": [
       {
-        "from": "..\\..\\frontend",
-        "to": "frontend"
-      },
-      {
-        "from": "..\\dist-backend\\navagator-backend.exe",
-        "to": "backend\\navagator-backend.exe"
+        "from": "..\\dist-backend\\navigator-backend.exe",
+        "to": "backend\\navigator-backend.exe"
       }
     ],
     "directories": {

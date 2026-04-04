@@ -1,6 +1,6 @@
 # Desktop Shell
 
-This folder prepares Navagator for an installable desktop wrapper.
+This folder prepares Navigator for an installable desktop wrapper.
 
 ## Current choice
 
@@ -15,7 +15,7 @@ Why:
 
 The Electron shell now:
 - looks for `..\\..\\.venv\\Scripts\\python.exe` first
-- falls back to `NAVAGATOR_PYTHON` or `python` from `PATH`
+- falls back to `NAVIGATOR_PYTHON` or legacy `NAVAGATOR_PYTHON`, then `python` from `PATH`
 - starts `uvicorn` for the local FastAPI backend automatically
 - waits for `GET /api/health` before opening the UI
 - stops the backend process when the desktop app exits
@@ -41,9 +41,10 @@ If PowerShell blocks `npm.ps1` on this machine, use:
 
 - Set `OPENAI_API_KEY` to enable GPT-assisted recommendations.
 - Tune model settings with:
-  - `NAVAGATOR_OPENAI_MODEL`
-  - `NAVAGATOR_REASONING_EFFORT`
-  - `NAVAGATOR_VERBOSITY`
+  - `NAVIGATOR_OPENAI_MODEL`
+  - `NAVIGATOR_REASONING_EFFORT`
+  - `NAVIGATOR_VERBOSITY`
+- Legacy `NAVAGATOR_*` environment names are still supported during transition.
 - If no API key is present, the backend stays usable in heuristic fallback mode.
 
 ## Packaging
@@ -55,20 +56,20 @@ From `desktop/electron/`:
 ```
 
 Outputs:
-- installer: `desktop/electron/dist/Navagator Setup 0.1.0.exe`
+- installer: `desktop/electron/dist/Navigator Setup 0.2.0.exe`
 - unpacked app: `desktop/electron/dist/win-unpacked/`
-- bundled backend exe: `desktop/dist-backend/navagator-backend.exe`
+- bundled backend exe: `desktop/dist-backend/navigator-backend.exe`
 
 ### Packaged app data and secrets
 
 When the app is **installed/built** (`app.isPackaged` is true), Electron sets:
 
-- `NAVAGATOR_APP_DATA_DIR` → Electron `userData` directory
-- `NAVAGATOR_DATABASE_PATH` → `<userData>/navagator.db`
+- `NAVIGATOR_APP_DATA_DIR` → Electron `userData` directory
+- `NAVIGATOR_DATABASE_PATH` → `<userData>/navigator.db`
 
 So session history and preferences persist per user profile, not next to the executable.
 
-On Windows, OpenAI API keys are stored in Windows Credential Manager under a Navagator-specific generic credential. Tests and non-Windows fallback paths use app-data files instead.
+On Windows, OpenAI API keys are stored in Windows Credential Manager under a Navigator-specific generic credential. Legacy Navagator credentials are still read during transition. Tests and non-Windows fallback paths use app-data files instead.
 
 Development mode (`npm start`) leaves these unset so the backend uses its default database path under `backend/app/data/`.
 

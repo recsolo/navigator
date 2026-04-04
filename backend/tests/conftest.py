@@ -5,9 +5,9 @@ import pytest
 
 @pytest.fixture
 def client(tmp_path, monkeypatch):
-    monkeypatch.setenv("NAVAGATOR_DATABASE_PATH", str(tmp_path / "test_navagator.db"))
-    monkeypatch.setenv("NAVAGATOR_APP_DATA_DIR", str(tmp_path / "appdata"))
-    monkeypatch.setenv("NAVAGATOR_SECRET_BACKEND", "file")
+    monkeypatch.setenv("NAVIGATOR_DATABASE_PATH", str(tmp_path / "test_navigator.db"))
+    monkeypatch.setenv("NAVIGATOR_APP_DATA_DIR", str(tmp_path / "appdata"))
+    monkeypatch.setenv("NAVIGATOR_SECRET_BACKEND", "file")
     monkeypatch.setenv("OPENAI_API_KEY", "")
     import app.config as config_module
 

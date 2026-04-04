@@ -6,6 +6,14 @@ from pathlib import Path
 from pydantic import BaseModel, Field
 
 
+def _get_env(*names: str) -> str | None:
+    for name in names:
+        value = os.getenv(name)
+        if value:
+            return value
+    return None
+
+
 def resolve_bundle_dir() -> Path:
     if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
         return Path(sys._MEIPASS) / "app"
@@ -13,40 +21,53 @@ def resolve_bundle_dir() -> Path:
 
 
 def resolve_app_data_dir() -> Path:
-    env_path = os.getenv("NAVAGATOR_APP_DATA_DIR")
+    env_path = _get_env("NAVIGATOR_APP_DATA_DIR", "NAVAGATOR_APP_DATA_DIR")
     if env_path:
         return Path(env_path)
 
     local_app_data = os.getenv("LOCALAPPDATA")
     if local_app_data:
-        return Path(local_app_data) / "Navagator"
+        return Path(local_app_data) / "Navigator"
 
-    return Path.home() / ".navagator"
+    legacy_local_path = Path.home() / ".navagator"
+    if legacy_local_path.exists():
+        return legacy_local_path
+    return Path.home() / ".navigator"
 
 
 def resolve_catalog_path() -> Path:
-    env_path = os.getenv("NAVAGATOR_CATALOG_PATH")
+    env_path = _get_env("NAVIGATOR_CATALOG_PATH", "NAVAGATOR_CATALOG_PATH")
     if env_path:
         return Path(env_path)
     return resolve_bundle_dir() / "data" / "tool_catalog.json"
 
 
 def resolve_database_path() -> Path:
-    env_path = os.getenv("NAVAGATOR_DATABASE_PATH")
+    env_path = _get_env("NAVIGATOR_DATABASE_PATH", "NAVAGATOR_DATABASE_PATH")
     if env_path:
         return Path(env_path)
 
     if getattr(sys, "frozen", False):
-        return resolve_app_data_dir() / "navagator.db"
+        app_data_dir = resolve_app_data_dir()
+        navigator_db = app_data_dir / "navigator.db"
+        legacy_db = app_data_dir / "navagator.db"
+        if legacy_db.exists() and not navigator_db.exists():
+            return legacy_db
+        return navigator_db
 
-    return Path(__file__).resolve().parent / "data" / "navagator.db"
+    data_dir = Path(__file__).resolve().parent / "data"
+    navigator_db = data_dir / "navigator.db"
+    legacy_db = data_dir / "navagator.db"
+    if legacy_db.exists() and not navigator_db.exists():
+        return legacy_db
+    return navigator_db
 
 
 class Settings(BaseModel):
-    app_name: str = "Navagator"
+    app_name: str = "Navigator"
     version: str = "0.1.0"
     local_profile_id: str = Field(
-        default_factory=lambda: os.getenv("NAVAGATOR_PROFILE_ID", "default")
+        default_factory=lambda: _get_env("NAVIGATOR_PROFILE_ID", "NAVAGATOR_PROFILE_ID") or "default"
     )
     data_path: Path = Field(default_factory=resolve_catalog_path)
     database_path: Path = Field(default_factory=resolve_database_path)
@@ -55,13 +76,13 @@ class Settings(BaseModel):
         default_factory=lambda: os.getenv("OPENAI_API_KEY")
     )
     recommendation_model: str = Field(
-        default_factory=lambda: os.getenv("NAVAGATOR_OPENAI_MODEL", "gpt-5.4")
+        default_factory=lambda: _get_env("NAVIGATOR_OPENAI_MODEL", "NAVAGATOR_OPENAI_MODEL") or "gpt-5.4"
     )
     recommendation_reasoning_effort: str = Field(
-        default_factory=lambda: os.getenv("NAVAGATOR_REASONING_EFFORT", "low")
+        default_factory=lambda: _get_env("NAVIGATOR_REASONING_EFFORT", "NAVAGATOR_REASONING_EFFORT") or "low"
     )
     recommendation_verbosity: str = Field(
-        default_factory=lambda: os.getenv("NAVAGATOR_VERBOSITY", "low")
+        default_factory=lambda: _get_env("NAVIGATOR_VERBOSITY", "NAVAGATOR_VERBOSITY") or "low"
     )
 
 

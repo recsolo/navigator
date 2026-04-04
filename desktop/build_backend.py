@@ -13,6 +13,10 @@ BUILD_DIR = DESKTOP_DIR / "build-tmp"
 CATALOG_FILE = BACKEND_DIR / "app" / "data" / "tool_catalog.json"
 
 
+BACKEND_EXE_NAME = "navigator-backend"
+LEGACY_BACKEND_EXE_NAME = "navagator-backend"
+
+
 def main() -> None:
     if DIST_DIR.exists():
         shutil.rmtree(DIST_DIR)
@@ -30,7 +34,7 @@ def main() -> None:
         "--clean",
         "--onefile",
         "--name",
-        "navagator-backend",
+        BACKEND_EXE_NAME,
         "--paths",
         str(BACKEND_DIR),
         "--distpath",
@@ -56,7 +60,13 @@ def main() -> None:
 
     print("Building backend executable with PyInstaller...")
     subprocess.run(command, check=True, cwd=ROOT)
-    print(f"Built backend executable at {DIST_DIR / 'navagator-backend.exe'}")
+
+    legacy_exe = DIST_DIR / f"{LEGACY_BACKEND_EXE_NAME}.exe"
+    new_exe = DIST_DIR / f"{BACKEND_EXE_NAME}.exe"
+    if legacy_exe.exists() and not new_exe.exists():
+        legacy_exe.rename(new_exe)
+
+    print(f"Built backend executable at {new_exe}")
 
 
 if __name__ == "__main__":

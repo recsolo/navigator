@@ -1,6 +1,6 @@
-﻿# Navagator Agent Rules
+# Navigator Agent Rules
 
-Navagator is an installable AI guidance product, not a generic landing page.
+Navigator is an installable Windows app that helps buyers choose the right AI tools and get a first workflow running. It is not a generic landing page.
 
 ## Product focus
 

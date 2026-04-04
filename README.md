@@ -1,6 +1,6 @@
-﻿# Navagator
+# Navigator
 
-Navagator is an installable AI guidance engine. The product helps people choose the right AI tools, learn how to use them together, and stay current without drowning in tool overload.
+Navigator is a Windows app that helps entrepreneurs pick the right AI tools for their goal, understand why they fit, and get a workflow to run first.
 
 ## Product direction
 
@@ -32,11 +32,20 @@ This repo now includes:
 - custom Windows app and installer icon
 - Windows installer packaging output under `desktop/electron/dist/`
 
+## Why this product matters
+
+People are wasting time and money bouncing between AI tools, random YouTube advice, and subscriptions they do not need.
+
+Navigator exists to help a buyer:
+- choose the right AI stack faster
+- avoid paying for the wrong tools
+- get a first workflow they can actually run
+
 ## Environment
 
-- Copy [backend/.env.example](C:\Users\mnanc\OneDrive\Documents\New%20project\navagator\backend\.env.example) if you want explicit local settings.
+- Copy `backend/.env.example` if you want explicit local settings.
 - Set `OPENAI_API_KEY` to use GPT-assisted ranking.
-- Without that key, Navagator falls back to the local heuristic engine.
+- Without that key, Navigator falls back to the local heuristic engine.
 
 ## Run
 
@@ -51,7 +60,7 @@ Windows installer build:
 
 ## Next build priorities
 
-1. Add richer profile management instead of only the default local profile.
-2. Replace the current flat tool catalog with scraper-fed or curated updates.
-3. Add publisher metadata and code-signing for release builds.
-4. Add multi-profile support instead of a single default profile.
+1. Tighten trust and recommendation transparency for first-time buyers.
+2. Add richer profile management instead of only the default local profile.
+3. Replace the current flat tool catalog with scraper-fed or curated updates.
+4. Add publisher metadata and code-signing for release builds.

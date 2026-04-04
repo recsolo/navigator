@@ -1,4 +1,4 @@
-# Release checklist (Navagator)
+# Release checklist (Navigator)
 
 Use this before tagging a release or shipping an installer to testers.
 
@@ -25,8 +25,8 @@ Use this before tagging a release or shipping an installer to testers.
 
 - [ ] Install Node dependencies: `desktop/electron/` → `npm install`.
 - [ ] Build PyInstaller backend: `npm run build:backend` from `desktop/electron` (or `python desktop/build_backend.py` from repo root with venv activated).
-- [ ] Build installer: `npm run dist:win` — confirm `navagator-backend.exe` is bundled under app resources.
-- [ ] Install the NSIS build on a clean machine or VM; confirm SQLite lives under Electron **userData** (packaged app sets `NAVAGATOR_DATABASE_PATH`).
+- [ ] Build installer: `npm run dist:win` — confirm `navigator-backend.exe` is bundled under app resources.
+- [ ] Install the NSIS build on a clean machine or VM; confirm SQLite lives under Electron **userData** (packaged app sets `NAVIGATOR_DATABASE_PATH`).
 - [ ] Quit app; confirm backend process stops.
 
 ## Security and secrets
