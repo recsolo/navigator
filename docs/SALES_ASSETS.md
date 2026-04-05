@@ -49,9 +49,9 @@ Windows desktop app that gives you a ranked AI tool shortlist, fit explanations,
 
 ## Pricing Framing
 
-Early access: **$19**
-Launch price: **$29**
-Bundle (app + quickstart PDF + template pack): **$39**
+Early access: **$5.99**
+Launch price: **$9.99**
+Bundle (app + quickstart PDF + template pack): **$19.99**
 
 ---
 
