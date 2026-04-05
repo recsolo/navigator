@@ -100,7 +100,7 @@ const QUESTIONNAIRE_FALLBACK = [
     kind: 'select',
     required: true,
     options: ['today', 'this week', 'this month'],
-    help_text: 'Urgency changes which tools are worth the setup cost.',
+    help_text: 'Urgent? You need tools that pay off fast. Slow burn? You can afford more setup.',
     show_when: {}
   },
   {
@@ -109,6 +109,7 @@ const QUESTIONNAIRE_FALLBACK = [
     kind: 'select',
     required: true,
     options: ['research insights', 'content asset', 'working prototype', 'automation system'],
+    help_text: 'The output shape decides which tools rank higher. Pick what matters most right now.',
     show_when: {}
   },
   {
@@ -117,6 +118,7 @@ const QUESTIONNAIRE_FALLBACK = [
     kind: 'select',
     required: true,
     options: ['solo', 'small team', 'client work', 'internal team'],
+    help_text: 'Solo or small team? Skip the enterprise tools. Client work? You may need shareable outputs.',
     show_when: {
       workflow_style: ['content production', 'automation', 'fast execution']
     }
@@ -128,7 +130,7 @@ const QUESTIONNAIRE_FALLBACK = [
     required: true,
     options: ['local-first', 'cloud-ok', 'no preference'],
     help_text:
-      'This helps Navigator favor installable and privacy-sensitive workflows when needed.',
+      'Pick local-first if you want tools that run on your machine without sending data elsewhere.',
     show_when: {
       workflow_style: ['automation', 'fast execution', 'deep research']
     }
@@ -426,13 +428,13 @@ function renderRecommendations(items) {
         <article class="stack-item${index === 0 ? ' stack-item--featured' : ''}">
           ${index === 0 ? '<span class="stack-badge">Top pick</span>' : ''}
           <div class="stack-top">
-            <div>
+            <div class="stack-name">
               <h3>${escapeHtml(item.tool.name)}</h3>
-              <p class="stack-meta">${escapeHtml(item.tool.description)}</p>
+              ${item.tool.best_for ? `<p class="stack-fit">${escapeHtml(item.tool.best_for)}</p>` : ''}
             </div>
             <div class="stack-score">${escapeHtml(String(item.score))}</div>
           </div>
-          <p class="stack-meta">${escapeHtml(item.tool.best_for || '')}</p>
+          <p class="stack-desc">${escapeHtml(item.tool.description || '')}</p>
           ${
             item.comparison_note
               ? `<p class="stack-compare">${escapeHtml(item.comparison_note)}</p>`
